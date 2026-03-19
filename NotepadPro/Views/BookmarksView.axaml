@@ -1,0 +1,275 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:model="using:NotepadPro.Models"
+             xmlns:vm="using:NotepadPro.ViewModels"
+             x:Class="NotepadPro.Views.BookmarksView"
+             x:CompileBindings="False">
+    <UserControl.Styles>
+        <Style Selector="Button.BookmarkAction">
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.BookmarkIconButton">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="MinWidth" Value="24" />
+            <Setter Property="MinHeight" Value="24" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.BookmarkIconButton TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style Selector="Button.BookmarkIconButton:pointerover">
+            <Setter Property="Background" Value="#20FFFFFF" />
+        </Style>
+        <Style Selector="ToggleButton.BookmarkFilterChip">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="10,3" />
+            <Setter Property="Margin" Value="0,0,6,6" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtle}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Grid.FilterActions > Button.BookmarkIconButton">
+            <Setter Property="Margin" Value="0,0,0,6" />
+        </Style>
+        <Style Selector="ToggleButton.BookmarkFilterChip:checked">
+            <Setter Property="Background" Value="#24FFFFFF" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="Border.BookmarkSection">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtle}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="Background" Value="{DynamicResource PanelBackground}" />
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="12" Margin="10">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <Button Grid.Column="0"
+                        Classes="BookmarkAction"
+                        Command="{Binding AddScopedBookmarkCommand}">
+                    <TextBlock Text="Add Scoped Bookmark"
+                               HorizontalAlignment="Center" />
+                </Button>
+                <Button Grid.Column="1"
+                        Classes="BookmarkAction"
+                        Command="{Binding AddGlobalBookmarkCommand}">
+                    <TextBlock Text="Add Global Bookmark"
+                               HorizontalAlignment="Center" />
+                </Button>
+            </Grid>
+
+            <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             Watermark="Search bookmarks by text, file, or line" />
+                    <ComboBox Grid.Column="1"
+                              MinWidth="110"
+                              ItemsSource="{Binding SortOptions}"
+                              SelectedItem="{Binding SortMode}" />
+                </Grid>
+                <WrapPanel Grid.Row="1" Classes="FilterActions" Orientation="Horizontal">
+                    <ToggleButton Classes="BookmarkFilterChip"
+                                  Command="{Binding ShowAllCommand}"
+                                  IsChecked="{Binding IsShowingAll}">
+                        <TextBlock Text="All" />
+                    </ToggleButton>
+                    <ToggleButton Classes="BookmarkFilterChip"
+                                  Command="{Binding ShowCurrentFileCommand}"
+                                  IsChecked="{Binding IsShowingCurrentFileOnly}">
+                        <TextBlock Text="Current File" />
+                    </ToggleButton>
+                    <ToggleButton Classes="BookmarkFilterChip"
+                                  Command="{Binding ShowStaleOnlyCommand}"
+                                  IsChecked="{Binding IsShowingStaleOnly}">
+                        <TextBlock Text="Stale" />
+                    </ToggleButton>
+                    <ToggleButton Classes="BookmarkFilterChip"
+                                  Command="{Binding ShowScopedOnlyCommand}"
+                                  IsChecked="{Binding IsShowingScopedOnly}">
+                        <TextBlock Text="Scoped" />
+                    </ToggleButton>
+                    <ToggleButton Classes="BookmarkFilterChip"
+                                  Command="{Binding ShowGlobalOnlyCommand}"
+                                  IsChecked="{Binding IsShowingGlobalOnly}">
+                        <TextBlock Text="Global" />
+                    </ToggleButton>
+                    <Button Classes="BookmarkIconButton"
+                            Command="{Binding ClearFiltersCommand}"
+                            ToolTip.Tip="Clear filters and reset sorting">
+                        <TextBlock Text="&#xE894;" FontFamily="Segoe Fluent Icons" />
+                    </Button>
+                </WrapPanel>
+            </Grid>
+
+            <Border Classes="BookmarkSection">
+                <Grid RowDefinitions="Auto,*">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Scoped Bookmarks"
+                                       Foreground="{DynamicResource ForegroundPrimary}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding VisibleScopedCount, StringFormat={}{0} visible in the active workspace or folder}"
+                                       Foreground="{DynamicResource ForegroundMuted}"
+                                       FontSize="11" />
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Classes="BookmarkIconButton"
+                                Command="{Binding ClearScopedBookmarksCommand}"
+                                VerticalAlignment="Center"
+                                ToolTip.Tip="Clear scoped bookmarks">
+                            <TextBlock Text="&#xE74D;" FontFamily="Segoe Fluent Icons" />
+                        </Button>
+                    </Grid>
+
+                    <TextBlock Grid.Row="1"
+                               Text="No scoped bookmarks match the current filters."
+                               Foreground="{DynamicResource ForegroundMuted}"
+                               IsVisible="{Binding !HasVisibleScopedBookmarks}" />
+
+                    <ListBox Grid.Row="1"
+                             x:Name="ScopedBookmarksList"
+                             ItemsSource="{Binding FilteredScopedBookmarks}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             IsVisible="{Binding HasVisibleScopedBookmarks}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="model:BookmarkItem">
+                                <Border Padding="0,4">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Text}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource ForegroundPrimary}" />
+                                            <TextBlock Foreground="{DynamicResource ForegroundMuted}" FontSize="11">
+                                                <Run Text="Ln " />
+                                                <Run Text="{Binding LineNumber}" />
+                                                <Run Text="  " />
+                                                <Run Text="{Binding FilePath}" />
+                                            </TextBlock>
+                                            <TextBlock Text="Bookmark may be stale"
+                                                       Foreground="#F2C14E"
+                                                       FontSize="11"
+                                                       IsVisible="{Binding IsStale}" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Classes="BookmarkIconButton"
+                                                Tag="{Binding .}"
+                                                VerticalAlignment="Center"
+                                                Click="OnOpenBookmarkClick"
+                                                ToolTip.Tip="Open bookmark">
+                                            <TextBlock Text="&#xE8A7;" FontFamily="Segoe Fluent Icons" />
+                                        </Button>
+                                        <Button Grid.Column="2"
+                                                Classes="BookmarkIconButton"
+                                                Tag="{Binding .}"
+                                                VerticalAlignment="Center"
+                                                Click="OnRemoveBookmarkClick"
+                                                ToolTip.Tip="Remove bookmark">
+                                            <TextBlock Text="&#xE74D;" FontFamily="Segoe Fluent Icons" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <Border Classes="BookmarkSection">
+                <Grid RowDefinitions="Auto,*">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Global Bookmarks"
+                                       Foreground="{DynamicResource ForegroundPrimary}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding VisibleGlobalCount, StringFormat={}{0} visible across projects}"
+                                       Foreground="{DynamicResource ForegroundMuted}"
+                                       FontSize="11" />
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Classes="BookmarkIconButton"
+                                Command="{Binding ClearGlobalBookmarksCommand}"
+                                VerticalAlignment="Center"
+                                ToolTip.Tip="Clear global bookmarks">
+                            <TextBlock Text="&#xE74D;" FontFamily="Segoe Fluent Icons" />
+                        </Button>
+                    </Grid>
+
+                    <TextBlock Grid.Row="1"
+                               Text="No global bookmarks match the current filters."
+                               Foreground="{DynamicResource ForegroundMuted}"
+                               IsVisible="{Binding !HasVisibleGlobalBookmarks}" />
+
+                    <ListBox Grid.Row="1"
+                             x:Name="GlobalBookmarksList"
+                             ItemsSource="{Binding FilteredGlobalBookmarks}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             IsVisible="{Binding HasVisibleGlobalBookmarks}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="model:BookmarkItem">
+                                <Border Padding="0,4">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Text}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource ForegroundPrimary}" />
+                                            <TextBlock Foreground="{DynamicResource ForegroundMuted}" FontSize="11">
+                                                <Run Text="Ln " />
+                                                <Run Text="{Binding LineNumber}" />
+                                                <Run Text="  " />
+                                                <Run Text="{Binding FilePath}" />
+                                            </TextBlock>
+                                            <TextBlock Text="Bookmark may be stale"
+                                                       Foreground="#F2C14E"
+                                                       FontSize="11"
+                                                       IsVisible="{Binding IsStale}" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Classes="BookmarkIconButton"
+                                                Tag="{Binding .}"
+                                                VerticalAlignment="Center"
+                                                Click="OnOpenBookmarkClick"
+                                                ToolTip.Tip="Open bookmark">
+                                            <TextBlock Text="&#xE8A7;" FontFamily="Segoe Fluent Icons" />
+                                        </Button>
+                                        <Button Grid.Column="2"
+                                                Classes="BookmarkIconButton"
+                                                Tag="{Binding .}"
+                                                VerticalAlignment="Center"
+                                                Click="OnRemoveBookmarkClick"
+                                                ToolTip.Tip="Remove bookmark">
+                                            <TextBlock Text="&#xE74D;" FontFamily="Segoe Fluent Icons" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

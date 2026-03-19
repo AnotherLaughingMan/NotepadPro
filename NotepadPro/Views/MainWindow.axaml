@@ -1,0 +1,1197 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NotepadPro.ViewModels"
+        xmlns:conv="using:NotepadPro.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:NotepadPro.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="NotepadPro.Views.MainWindow"
+        x:Name="RootWindow"
+        x:CompileBindings="False"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/notepad_pro.ico"
+        FontFamily="Segoe UI"
+        FontSize="{Binding Settings.UiFontSize}"
+        Title="{Binding WindowTitle}"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="0"
+        SystemDecorations="BorderOnly">
+
+    <Window.Resources>
+        <conv:BoolNegationConverter x:Key="BoolNegationConverter" />
+    </Window.Resources>
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+        to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid x:Name="LayoutRoot">
+        <Grid.Styles>
+            <Style Selector="TextBlock">
+                <Setter Property="FontSize" Value="{Binding ViewModel.Settings.UiFontSize, ElementName=RootWindow}" />
+            </Style>
+            <Style Selector="MenuItem">
+                <Setter Property="FontSize" Value="{Binding ViewModel.Settings.MenuFontSize, ElementName=RootWindow}" />
+            </Style>
+            <Style Selector="TextBox:not(#EditorTextBox)">
+                <Setter Property="FontSize" Value="{Binding ViewModel.Settings.UiFontSize, ElementName=RootWindow}" />
+            </Style>
+            <Style Selector="ToggleButton.RailButton">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="FocusAdorner" Value="{x:Null}" />
+            </Style>
+            <Style Selector="ToggleButton.RailButton TextBlock.RailIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundInactive}" />
+                <Setter Property="Opacity" Value="0.8" />
+            </Style>
+            <Style Selector="ToggleButton.RailButton:pointerover TextBlock.RailIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
+                <Setter Property="Opacity" Value="1" />
+            </Style>
+            <Style Selector="ToggleButton.RailButton:pointerover">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+            </Style>
+            <Style Selector="ToggleButton.RailButton:checked TextBlock.RailIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
+                <Setter Property="Opacity" Value="1" />
+            </Style>
+            <Style Selector="ToggleButton.RailButton:checked">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ForegroundPrimary}" />
+                <Setter Property="BorderThickness" Value="2,0,0,0" />
+                <Setter Property="CornerRadius" Value="0" />
+            </Style>
+            <Style Selector="Button.RailButton">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="FocusAdorner" Value="{x:Null}" />
+            </Style>
+            <Style Selector="Button.RailButton TextBlock.RailIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundInactive}" />
+                <Setter Property="Opacity" Value="0.8" />
+            </Style>
+            <Style Selector="Button.RailButton:pointerover TextBlock.RailIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
+                <Setter Property="Opacity" Value="1" />
+            </Style>
+            <Style Selector="Button.RailButton:pointerover">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+            </Style>
+            <Style Selector="Button.MarkdownToolbarButton">
+                <Setter Property="Width" Value="28" />
+                <Setter Property="Height" Value="28" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="CornerRadius" Value="4" />
+            </Style>
+            <Style Selector="Button.MarkdownToolbarButton:pointerover">
+                <Setter Property="Background" Value="{DynamicResource IconButtonHover}" />
+            </Style>
+            <Style Selector="Button.MarkdownToolbarButton.Active">
+                <Setter Property="Background" Value="{DynamicResource IconButtonHover}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+            <Style Selector="Border.MarkdownToolbarHandle">
+                <Setter Property="Width" Value="16" />
+                <Setter Property="Height" Value="24" />
+                <Setter Property="CornerRadius" Value="3" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Margin" Value="0,0,4,0" />
+            </Style>
+            <Style Selector="Border.MarkdownToolbarHandle:pointerover">
+                <Setter Property="Background" Value="{DynamicResource IconButtonHover}" />
+            </Style>
+        </Grid.Styles>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="1" Grid.Column="0" Width="56" IsVisible="{Binding Settings.IsActivityBarLeft}" Background="{DynamicResource SideBarBackground}" BorderBrush="{DynamicResource BorderSubtle}" BorderThickness="0,0,1,0">
+            <Grid RowDefinitions="*,Auto">
+                <StackPanel Grid.Row="0" Spacing="10" Margin="6,10">
+                    <ToggleButton Width="40"
+                                  Height="40"
+                                  Classes="RailButton"
+                                  Command="{Binding ShowExplorerCommand}"
+                                  IsChecked="{Binding IsExplorerVisible}"
+                                  ToolTip.Tip="Explorer">
+                        <TextBlock Classes="RailIcon"
+                                   Text="&#xE8B7;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="{Binding Settings.RailIconSize}" />
+                    </ToggleButton>
+                    <ToggleButton Width="40"
+                                  Height="40"
+                                  Classes="RailButton"
+                                  Command="{Binding ShowSearchCommand}"
+                                  IsChecked="{Binding IsSearchVisible}"
+                                  ToolTip.Tip="Search">
+                        <TextBlock Classes="RailIcon"
+                                   Text="&#xE721;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="{Binding Settings.RailIconSize}" />
+                    </ToggleButton>
+                    <ToggleButton Width="40"
+                                  Height="40"
+                                  Classes="RailButton"
+                                  Command="{Binding ShowBookmarksCommand}"
+                                  IsChecked="{Binding IsBookmarksVisible}"
+                                  ToolTip.Tip="Bookmarks">
+                        <TextBlock Classes="RailIcon"
+                                   Text="&#xE8A4;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="{Binding Settings.RailIconSize}" />
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Spacing="10" Margin="6,10" VerticalAlignment="Bottom">
+                    <Button Width="40"
+                            Height="40"
+                            Classes="RailButton"
+                            Click="OnSettingsClick"
+                            ToolTip.Tip="Settings">
+                        <TextBlock Classes="RailIcon"
+                                   Text="&#xE713;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="{Binding Settings.RailIconSize}" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Grid.Column="2" Width="56" IsVisible="{Binding Settings.IsActivityBarRight}" Background="{DynamicResource SideBarBackground}" BorderBrush="{DynamicResource BorderSubtle}" BorderThickness="1,0,0,0">
+            <Grid RowDefinitions="*,Auto">
+                <StackPanel Grid.Row="0" Spacing="10" Margin="6,10">
+                    <ToggleButton Width="40"
+                                  Height="40"
+                                  Classes="RailButton"
+                                  Command="{Binding ShowExplorerCommand}"
+                                  IsChecked="{Binding IsExplorerVisible}"
+                                  ToolTip.Tip="Explorer">
+                        <TextBlock Classes="RailIcon"
+                                   Text="&#xE8B7;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="{Binding Settings.RailIconSize}" />
+                    </ToggleButton>
+                    <ToggleButton Width="40"
+                                  Height="40"
+                                  Classes="RailButton"
+                                  Command="{Binding ShowSearchCommand}"
+                                  IsChecked="{Binding IsSearchVisible}"
+                                  ToolTip.Tip="Search">
+                        <TextBlock Classes="RailIcon"
+                                   Text="&#xE721;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="{Binding Settings.RailIconSize}" />
+                    </ToggleButton>
+                    <ToggleButton Width="40"
+                                  Height="40"
+                                  Classes="RailButton"
+                                  Command="{Binding ShowBookmarksCommand}"
+                                  IsChecked="{Binding IsBookmarksVisible}"
+                                  ToolTip.Tip="Bookmarks">
+                        <TextBlock Classes="RailIcon"
+                                   Text="&#xE8A4;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="{Binding Settings.RailIconSize}" />
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Spacing="10" Margin="6,10" VerticalAlignment="Bottom">
+                    <Button Width="40"
+                            Height="40"
+                            Classes="RailButton"
+                            Click="OnSettingsClick"
+                            ToolTip.Tip="Settings">
+                        <TextBlock Classes="RailIcon"
+                                   Text="&#xE713;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="{Binding Settings.RailIconSize}" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.ColumnSpan="3" Background="{DynamicResource MenuBarBackground}" BorderBrush="{DynamicResource BorderAccent}" BorderThickness="0,0,0,1"
+                PointerPressed="OnTitleBarPointerPressed" PointerMoved="OnTitleBarPointerMoved">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Grid.Column="0" Padding="14,0,2,0" VerticalAlignment="Center" IsHitTestVisible="False">
+                    <TextBlock Text="&#xE929;" FontFamily="Segoe Fluent Icons" FontSize="16" Foreground="{DynamicResource ForegroundPrimary}" VerticalAlignment="Center" />
+                </Border>
+                <Grid x:Name="TitleBarCenterRegion" Grid.Column="1" Margin="6,0">
+                    <Menu x:Name="MainMenuBar" Background="Transparent">
+                        <MenuItem Header="File">
+                            <MenuItem Header="New">
+                                <MenuItem Header="Text" InputGesture="Ctrl+N" Click="OnFileNewText" />
+                                <MenuItem Header="Markdown" Click="OnFileNewMarkdown" />
+                                <Separator />
+                                <MenuItem Header="JSON" Click="OnFileNewJson" />
+                                <MenuItem Header="XML" Click="OnFileNewXml" />
+                                <MenuItem Header="C#" Click="OnFileNewCSharp" />
+                                <MenuItem Header="C" Click="OnFileNewC" />
+                                <MenuItem Header="C++" Click="OnFileNewCpp" />
+                                <MenuItem Header="XAML" Click="OnFileNewXaml" />
+                                <MenuItem Header="AXAML" Click="OnFileNewAxaml" />
+                            </MenuItem>
+                            <MenuItem Header="Open..." InputGesture="Ctrl+O" Click="OnFileOpen" />
+                            <MenuItem Header="Open Folder..." Click="OnFileOpenFolder" />
+                            <MenuItem Header="Open Workspace..." Click="OnFileOpenWorkspace" />
+                            <MenuItem Header="Create New Workspace..." Click="OnFileCreateWorkspace" />
+                            <Separator />
+                            <MenuItem Header="Close Editor" InputGesture="Ctrl+W" Click="OnFileCloseEditor" />
+                            <MenuItem Header="Close Folder" Click="OnFileCloseFolder" />
+                            <MenuItem Header="Close Workspace" Click="OnFileCloseWorkspace" />
+                            <Separator />
+                            <MenuItem Header="Save" InputGesture="Ctrl+S" Click="OnFileSave" />
+                            <MenuItem Header="Save As..." InputGesture="Ctrl+Shift+S" Click="OnFileSaveAs" />
+                            <Separator />
+                            <MenuItem Header="Page Setup" Click="OnFilePageSetup" />
+                            <MenuItem Header="Print" Click="OnFilePrint" />
+                            <Separator />
+                            <MenuItem Header="Preferences">
+                                <MenuItem Header="Settings" Click="OnSettingsClick" />
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="Open Recent" x:Name="OpenRecentMenu" />
+                            <Separator />
+                            <MenuItem Header="Exit" Click="OnFileExit" />
+                        </MenuItem>
+                        <MenuItem Header="Edit">
+                            <MenuItem Header="Command Palette..." InputGesture="Ctrl+Shift+P" Click="OnCommandPalette" />
+                            <MenuItem Header="Goto Anything..." InputGesture="Ctrl+P" Click="OnGotoAnything" />
+                            <Separator />
+                            <MenuItem Header="Undo" InputGesture="Ctrl+Z" Click="OnEditUndo" />
+                            <MenuItem Header="Redo" InputGesture="Ctrl+Y" Click="OnEditRedo" />
+                            <Separator />
+                            <MenuItem Header="Cut" InputGesture="Ctrl+X" Click="OnEditCut" />
+                            <MenuItem Header="Copy" InputGesture="Ctrl+C" Click="OnEditCopy" />
+                            <MenuItem Header="Paste" InputGesture="Ctrl+V" Click="OnEditPaste" />
+                            <MenuItem Header="Delete" InputGesture="Delete" Click="OnEditDelete" />
+                            <Separator />
+                            <MenuItem Header="Indent" InputGesture="Tab" Click="OnEditIndent" />
+                            <MenuItem Header="Outdent" InputGesture="Shift+Tab" Click="OnEditOutdent" />
+                            <MenuItem Header="Convert Tabs to Spaces" Click="OnEditConvertTabsToSpaces" />
+                            <MenuItem Header="Convert Spaces to Tabs" Click="OnEditConvertSpacesToTabs" />
+                            <Separator />
+                            <MenuItem Header="Find" InputGesture="Ctrl+F" Click="OnEditFind" />
+                            <MenuItem Header="Find Next" InputGesture="F3" Click="OnEditFindNext" />
+                            <MenuItem Header="Replace" InputGesture="Ctrl+H" Click="OnEditReplace" />
+                            <MenuItem Header="Go To" InputGesture="Ctrl+G" Click="OnEditGoTo" />
+                            <MenuItem Header="Toggle Bookmark" InputGesture="Ctrl+F2" Click="OnEditToggleBookmark" />
+                            <MenuItem Header="Toggle Global Bookmark" InputGesture="Ctrl+Shift+F2" Click="OnEditToggleGlobalBookmark" />
+                            <MenuItem Header="Next Bookmark" InputGesture="F2" Click="OnEditNextBookmark" />
+                            <MenuItem Header="Previous Bookmark" InputGesture="Shift+F2" Click="OnEditPreviousBookmark" />
+                            <MenuItem Header="List Bookmarks..." Click="OnEditListBookmarks" />
+                            <MenuItem Header="Import Bookmarks..." Click="OnEditImportBookmarks" />
+                            <MenuItem Header="Export Bookmarks..." Click="OnEditExportBookmarks" />
+                            <MenuItem Header="Clear Bookmarks In File" Click="OnEditClearBookmarksInFile" />
+                            <MenuItem Header="Clear All Bookmarks" Click="OnEditClearAllBookmarks" />
+                            <Separator />
+                            <MenuItem Header="Select All" InputGesture="Ctrl+A" Click="OnEditSelectAll" />
+                            <MenuItem Header="Time/Date" InputGesture="F5" Click="OnEditTimeDate" />
+                        </MenuItem>
+                        <MenuItem Header="View">
+                            <MenuItem Header="Explorer"
+                                      ToggleType="CheckBox"
+                                      IsChecked="{Binding IsExplorerVisible}"
+                                      InputGesture="Ctrl+Shift+E"
+                                      Click="OnViewToggleExplorer" />
+                            <MenuItem Header="Search"
+                                      ToggleType="CheckBox"
+                                      IsChecked="{Binding IsSearchVisible}"
+                                      InputGesture="Ctrl+Shift+F"
+                                      Click="OnViewToggleSearch" />
+                            <MenuItem Header="Bookmarks"
+                                      ToggleType="CheckBox"
+                                      IsChecked="{Binding IsBookmarksVisible}"
+                                      InputGesture="Ctrl+Shift+B"
+                                      Click="OnViewToggleBookmarks" />
+                            <Separator />
+                <MenuItem Header="Appearance">
+                                <MenuItem Header="Status Bar"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding Settings.IsStatusBarVisible, Mode=TwoWay}" />
+                                <Separator />
+                                <MenuItem Header="Word Wrap"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding Settings.WordWrap, Mode=TwoWay}"
+                                          InputGesture="Alt+Z" />
+                                <MenuItem Header="Line Numbers"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding Settings.ShowLineNumbers, Mode=TwoWay}" />
+                                <MenuItem Header="Minimap"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding Settings.IsMinimapVisible, Mode=TwoWay}" />
+                                <MenuItem Header="Render Whitespace"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding Settings.RenderWhitespace, Mode=TwoWay}" />
+                                <Separator />
+                                <MenuItem Header="Auto Indent"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding Settings.AutoIndentation, Mode=TwoWay}" />
+                                <MenuItem Header="Auto Close Brackets"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding Settings.AutoBracketing, Mode=TwoWay}" />
+                                <Separator />
+                                <MenuItem Header="Activity Bar Position">
+                                    <MenuItem Header="Left"
+                                              ToggleType="CheckBox"
+                                              IsChecked="{Binding Settings.IsActivityBarLeft}"
+                                              Click="OnViewActivityBarLeft" />
+                                    <MenuItem Header="Right"
+                                              ToggleType="CheckBox"
+                                              IsChecked="{Binding Settings.IsActivityBarRight}"
+                                              Click="OnViewActivityBarRight" />
+                                    <MenuItem Header="Hidden"
+                                              ToggleType="CheckBox"
+                                              IsChecked="{Binding Settings.IsActivityBarVisible, Converter={StaticResource BoolNegationConverter}}"
+                                              Click="OnViewActivityBarHidden" />
+                                </MenuItem>
+                                <MenuItem Header="Primary Panel Position">
+                                    <MenuItem Header="Left Side (Default)"
+                                              ToggleType="CheckBox"
+                                              IsChecked="{Binding Settings.IsPrimaryPanelLeft}"
+                                              Click="OnViewPrimaryPanelLeft" />
+                                    <MenuItem Header="Right Side"
+                                              ToggleType="CheckBox"
+                                              IsChecked="{Binding Settings.IsPrimaryPanelRight}"
+                                              Click="OnViewPrimaryPanelRight" />
+                                </MenuItem>
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="Markdown Preview"
+                                      ToggleType="CheckBox"
+                                      IsChecked="{Binding IsMarkdownPreviewVisible, Mode=TwoWay}"
+                                      IsEnabled="{Binding IsActiveEditorMarkdown}" />
+                            <MenuItem Header="Markdown Toolbar"
+                                      ToggleType="CheckBox"
+                                      IsChecked="{Binding IsMarkdownToolbarVisible, Mode=TwoWay}"
+                                      IsEnabled="{Binding IsActiveEditorMarkdown}" />
+                            <MenuItem Header="Pin Markdown Toolbar"
+                                      ToggleType="CheckBox"
+                                      IsChecked="{Binding IsMarkdownToolbarPinned, Mode=TwoWay}"
+                                      IsEnabled="{Binding IsMarkdownToolbarPinAvailable}" />
+                            <MenuItem Header="Recover Markdown Toolbar To Title Bar"
+                                      Click="OnMarkdownToolbarRecoverToPinned"
+                                      IsEnabled="{Binding IsActiveEditorMarkdown}" />
+                            <MenuItem Header="Reset Floating Markdown Toolbar Position"
+                                      Click="OnMarkdownToolbarResetFloatingPosition"
+                                      IsEnabled="{Binding IsActiveEditorMarkdown}" />
+                            <Separator />
+                            <MenuItem Header="Zoom In" InputGesture="Ctrl+OemPlus" Click="OnViewZoomIn" />
+                            <MenuItem Header="Zoom Out" InputGesture="Ctrl+OemMinus" Click="OnViewZoomOut" />
+                            <MenuItem Header="Restore Default Zoom" InputGesture="Ctrl+NumPad0" Click="OnViewZoomReset" />
+                            <Separator />
+                            <MenuItem Header="Fold All" Click="OnViewFoldAll" />
+                            <MenuItem Header="Unfold All" Click="OnViewUnfoldAll" />
+                        </MenuItem>
+                        <MenuItem Header="Help">
+                            <MenuItem Header="Markdown Toolbar Shortcuts">
+                                <MenuItem Header="Heading: Shift decreases level" IsEnabled="False" />
+                                <MenuItem Header="Bulleted List: Shift converts to numbered" IsEnabled="False" />
+                                <MenuItem Header="Numbered List: Shift converts to bulleted" IsEnabled="False" />
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="About Notepad Pro" Click="OnHelpAbout" />
+                        </MenuItem>
+                    </Menu>
+
+                    <StackPanel x:Name="PinnedMarkdownToolbar"
+                                Orientation="Horizontal"
+                                Spacing="2"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="0"
+                                Panel.ZIndex="2"
+                                IsVisible="{Binding IsMarkdownToolbarPinnedShown}">
+                        <Button x:Name="PinnedMdTogglePreviewButton" Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Preview">
+                            <TextBlock Text="&#xE8A1;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+                        <Button x:Name="PinnedMdHeadingButton" Classes="MarkdownToolbarButton" Click="OnMarkdownHeading" ToolTip.Tip="Heading (Shift: Decrease)">
+                            <TextBlock Text="H1" FontWeight="Bold" FontSize="11" />
+                        </Button>
+                        <Button x:Name="PinnedMdBulletedListButton" Classes="MarkdownToolbarButton" Click="OnMarkdownBulletedList" ToolTip.Tip="Bulleted List (Shift: Numbered)">
+                            <TextBlock Text="&#xE8FD;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+                        <Button x:Name="PinnedMdNumberedListButton" Classes="MarkdownToolbarButton" Click="OnMarkdownNumberedList" ToolTip.Tip="Numbered List (Shift: Bulleted)">
+                            <TextBlock Text="&#xE8EF;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+                        <Button x:Name="PinnedMdBoldButton" Classes="MarkdownToolbarButton" Click="OnMarkdownBold" ToolTip.Tip="Bold">
+                            <TextBlock Text="&#xE8DD;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+                        <Button x:Name="PinnedMdItalicButton" Classes="MarkdownToolbarButton" Click="OnMarkdownItalic" ToolTip.Tip="Italic">
+                            <TextBlock Text="&#xE8DB;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+                        <Button x:Name="PinnedMdInlineCodeButton" Classes="MarkdownToolbarButton" Click="OnMarkdownInlineCode" ToolTip.Tip="Code">
+                            <TextBlock Text="&#xE943;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+                        <Button x:Name="PinnedMdLinkButton" Classes="MarkdownToolbarButton" Click="OnMarkdownLink" ToolTip.Tip="Link">
+                            <TextBlock Text="&#xE71B;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+                        <Button x:Name="PinnedMdPinToggleButton" Classes="MarkdownToolbarButton" Click="OnMarkdownToolbarPinToggle" ToolTip.Tip="Unpin From Drag Bar">
+                            <TextBlock Text="&#xE840;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+                        <Button x:Name="PinnedMdHideButton" Classes="MarkdownToolbarButton" Click="OnMarkdownToolbarHide" ToolTip.Tip="Hide Toolbar">
+                            <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        </Button>
+
+                        <Button x:Name="PinnedMdOverflowButton"
+                                Classes="MarkdownToolbarButton"
+                                Click="OnPinnedMarkdownOverflowClick"
+                                ToolTip.Tip="More Markdown Tools"
+                                IsVisible="False">
+                            <TextBlock Text="&#xE712;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                            <Button.Flyout>
+                                <Flyout Placement="Bottom">
+                                    <Border Padding="6"
+                                            CornerRadius="8"
+                                            BorderThickness="1"
+                                            BorderBrush="{DynamicResource BorderMedium}"
+                                            Background="{DynamicResource PanelBackground}">
+                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                            <Button x:Name="PinnedMdOverflowTogglePreview" Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Preview">
+                                                <TextBlock Text="&#xE8A1;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowHeading" Classes="MarkdownToolbarButton" Click="OnMarkdownHeading" ToolTip.Tip="Heading (Shift: Decrease)">
+                                                <TextBlock Text="H1" FontWeight="Bold" FontSize="11" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowBulleted" Classes="MarkdownToolbarButton" Click="OnMarkdownBulletedList" ToolTip.Tip="Bulleted List (Shift: Numbered)">
+                                                <TextBlock Text="&#xE8FD;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowNumbered" Classes="MarkdownToolbarButton" Click="OnMarkdownNumberedList" ToolTip.Tip="Numbered List (Shift: Bulleted)">
+                                                <TextBlock Text="&#xE8EF;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowBold" Classes="MarkdownToolbarButton" Click="OnMarkdownBold" ToolTip.Tip="Bold">
+                                                <TextBlock Text="&#xE8DD;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowItalic" Classes="MarkdownToolbarButton" Click="OnMarkdownItalic" ToolTip.Tip="Italic">
+                                                <TextBlock Text="&#xE8DB;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowInlineCode" Classes="MarkdownToolbarButton" Click="OnMarkdownInlineCode" ToolTip.Tip="Code">
+                                                <TextBlock Text="&#xE943;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowLink" Classes="MarkdownToolbarButton" Click="OnMarkdownLink" ToolTip.Tip="Link">
+                                                <TextBlock Text="&#xE71B;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowPinToggle" Classes="MarkdownToolbarButton" Click="OnMarkdownToolbarPinToggle" ToolTip.Tip="Unpin From Drag Bar">
+                                                <TextBlock Text="&#xE840;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                            <Button x:Name="PinnedMdOverflowHide" Classes="MarkdownToolbarButton" Click="OnMarkdownToolbarHide" ToolTip.Tip="Hide Toolbar">
+                                                <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="0" VerticalAlignment="Stretch">
+                    <StackPanel.Styles>
+                        <Style Selector="Button.CaptionButton">
+                            <Setter Property="Width" Value="46" />
+                            <Setter Property="Height" Value="32" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="CornerRadius" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="FocusAdorner" Value="{x:Null}" />
+                            <Setter Property="Padding" Value="0" />
+                        </Style>
+                        <Style Selector="Button.CaptionButton:pointerover">
+                            <Setter Property="Background" Value="#30FFFFFF" />
+                        </Style>
+                        <Style Selector="Button.CaptionButton.CloseButton:pointerover">
+                            <Setter Property="Background" Value="#E81123" />
+                        </Style>
+                    </StackPanel.Styles>
+                    <Button Classes="CaptionButton" Click="OnMinimizeClick" ToolTip.Tip="Minimize">
+                        <TextBlock Text="&#xE921;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                    </Button>
+                    <Button Classes="CaptionButton" Click="OnMaximizeRestoreClick" ToolTip.Tip="Maximize"
+                            x:Name="MaxRestoreButton">
+                        <TextBlock x:Name="MaxRestoreIcon" Text="&#xE922;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                    </Button>
+                    <Button Classes="CaptionButton CloseButton" Click="OnCloseClick" ToolTip.Tip="Close">
+                        <TextBlock Text="&#xE8BB;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" Grid.Row="1" x:Name="EditorAreaGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320" MinWidth="180" MaxWidth="600" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="0" MinWidth="0" MaxWidth="0" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="14" />
+            </Grid.ColumnDefinitions>
+
+            <Border x:Name="ToolPanelLeftHost"
+                    Grid.Column="0"
+                    Background="{DynamicResource ToolPanelBackground}"
+                    BorderBrush="{DynamicResource BorderMedium}"
+                    BorderThickness="0,0,1,0"
+                    ClipToBounds="True">
+                <Grid RowDefinitions="Auto,*">
+                    <Border Background="{DynamicResource TitleBarBackground}" Padding="10,8"
+                            IsVisible="{Binding !IsExplorerVisible}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding ToolPanelTitle}"
+                                       Foreground="{DynamicResource ForegroundPrimary}"
+                                       FontSize="{Binding Settings.PanelHeaderFontSize}" />
+                            <Button Grid.Column="1"
+                                    Width="28"
+                                    Height="28"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="0"
+                                    IsVisible="{Binding !IsExplorerVisible}"
+                                    ToolTip.Tip="Close"
+                                    Command="{Binding CloseToolPanelCommand}">
+                                <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons" FontSize="12" Foreground="{DynamicResource ForegroundPrimary}" />
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <ContentControl Grid.Row="1" Content="{Binding ToolPanelViewModel}" />
+                </Grid>
+            </Border>
+
+            <!-- Drag splitter for tool panel -->
+            <GridSplitter x:Name="LeftToolPanelSplitter"
+                          Grid.Column="1"
+                          Width="4"
+                          Background="Transparent"
+                          ResizeBehavior="PreviousAndNext" />
+
+            <Border Grid.Column="2" Background="{DynamicResource EditorSurface}" BorderBrush="Transparent" BorderThickness="0">
+                <Grid>
+                    <TabControl ItemsSource="{Binding Tabs}"
+                                SelectedItem="{Binding SelectedTab}"
+                                TabStripPlacement="Top"
+                                x:CompileBindings="False"
+                                x:Name="MainTabControl">
+                        <TabControl.Template>
+                            <ControlTemplate>
+                                <DockPanel>
+                                    <ScrollViewer x:Name="TabScrollViewer"
+                                                  DockPanel.Dock="Top"
+                                                  HorizontalScrollBarVisibility="Hidden"
+                                                  VerticalScrollBarVisibility="Disabled">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ItemsPresenter Name="PART_ItemsPresenter">
+                                                <ItemsPresenter.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsPresenter.ItemsPanel>
+                                            </ItemsPresenter>
+                                            <Button Classes="TabAdd"
+                                                    ToolTip.Tip="New Tab"
+                                                    Click="OnTabAddClick">
+                                                <TextBlock Text="&#xE710;"
+                                                           FontFamily="Segoe Fluent Icons"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource ForegroundPrimary}" />
+                                            </Button>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                    <ContentPresenter Name="PART_SelectedContentHost"
+                                                      Margin="{TemplateBinding Padding}"
+                                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                      Content="{TemplateBinding SelectedContent}"
+                                                      ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+                                </DockPanel>
+                            </ControlTemplate>
+                        </TabControl.Template>
+                        <TabControl.Styles>
+                            <!-- Override TabItem template to prevent clipping -->
+                            <Style Selector="TabItem">
+                                <Setter Property="MinWidth" Value="140" />
+                                <Setter Property="MaxWidth" Value="320" />
+                                <Setter Property="Height" Value="30" />
+                                <Setter Property="MinHeight" Value="30" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="FontSize" Value="{Binding ViewModel.Settings.TabFontSize, ElementName=RootWindow}" />
+                                <Setter Property="Template">
+                                    <ControlTemplate>
+                                        <Border Background="{DynamicResource InactiveTabBackground}"
+                                                BorderBrush="{DynamicResource BorderMedium}"
+                                                BorderThickness="0,0,1,0"
+                                                Padding="10,2,10,2"
+                                                ClipToBounds="False"
+                                                Name="PART_TabBorder">
+                                            <ContentPresenter Content="{TemplateBinding HeaderedContentControl.Header}"
+                                                              ContentTemplate="{TemplateBinding HeaderedContentControl.HeaderTemplate}"
+                                                              HorizontalAlignment="Stretch"
+                                                              VerticalAlignment="Center" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter>
+                            </Style>
+                            <Style Selector="TabItem:selected /template/ Border#PART_TabBorder">
+                                <Setter Property="Background" Value="{DynamicResource ActiveTabBackground}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                <Setter Property="BorderThickness" Value="0,2,1,0" />
+                            </Style>
+                            <Style Selector="TabItem:pointerover /template/ Border#PART_TabBorder">
+                                <Setter Property="Background" Value="{DynamicResource TabHoverBackground}" />
+                            </Style>
+                            <Style Selector="Button.TabClose">
+                                <Setter Property="Width" Value="16" />
+                                <Setter Property="Height" Value="16" />
+                                <Setter Property="MinWidth" Value="16" />
+                                <Setter Property="MinHeight" Value="16" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderBrush" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="Opacity" Value="0" />
+                            </Style>
+                            <Style Selector="TabItem:pointerover Button.TabClose">
+                                <Setter Property="Opacity" Value="1" />
+                            </Style>
+                            <Style Selector="TabItem:selected Button.TabClose">
+                                <Setter Property="Opacity" Value="1" />
+                            </Style>
+                            <Style Selector="Button.TabClose:pointerover">
+                                <Setter Property="Background" Value="{DynamicResource IconButtonHover}" />
+                                <Setter Property="CornerRadius" Value="3" />
+                            </Style>
+                            <Style Selector="TextBlock.TabPinIcon">
+                                <Setter Property="Foreground" Value="{DynamicResource ForegroundMuted}" />
+                                <Setter Property="FontSize" Value="10" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                            </Style>
+                            <Style Selector="Button.TabAdd">
+                                <Setter Property="Width" Value="28" />
+                                <Setter Property="Height" Value="28" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="6,0,0,0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderBrush" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="CornerRadius" Value="4" />
+                            </Style>
+                            <Style Selector="Button.TabAdd:pointerover">
+                                <Setter Property="Background" Value="{DynamicResource TabHoverBackground}" />
+                            </Style>
+                        </TabControl.Styles>
+                        <TabControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:EditorTabViewModel">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                                      VerticalAlignment="Center"
+                                      ColumnSpacing="6"
+                                      Tag="{Binding}"
+                                      PointerPressed="OnTabHeaderPointerPressed">
+                                    <Grid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Pin Tab"
+                                                      Tag="{Binding}"
+                                                      IsVisible="{Binding !IsPinned}"
+                                                      Click="OnTabPinToggleClick" />
+                                            <MenuItem Header="Unpin Tab"
+                                                      Tag="{Binding}"
+                                                      IsVisible="{Binding IsPinned}"
+                                                      Click="OnTabPinToggleClick" />
+                                            <MenuItem Header="Duplicate Tab"
+                                                      Tag="{Binding}"
+                                                      Click="OnTabDuplicateClick" />
+                                            <MenuItem Header="Reveal In Explorer"
+                                                      Tag="{Binding}"
+                                                      Click="OnTabRevealInExplorerClick" />
+                                            <Separator />
+                                            <MenuItem Header="Close"
+                                                      Tag="{Binding}"
+                                                      Click="OnTabContextCloseClick" />
+                                            <MenuItem Header="Close Others"
+                                                      Tag="{Binding}"
+                                                      Click="OnTabCloseOthersClick" />
+                                            <MenuItem Header="Close Tabs To The Right"
+                                                      Tag="{Binding}"
+                                                      Click="OnTabCloseTabsToRightClick" />
+                                        </ContextMenu>
+                                    </Grid.ContextMenu>
+                                    <Border Grid.Column="0"
+                                            Width="16"
+                                            Height="16"
+                                            Background="Transparent"
+                                            VerticalAlignment="Center"
+                                            IsVisible="{Binding IsFileTypeIconVisible}">
+                                        <TextBlock Text="{Binding FileTypeIcon.Glyph}"
+                                                   ToolTip.Tip="{Binding FileTypeIcon.Label}"
+                                                   FontFamily="Segoe Fluent Icons"
+                                                   FontSize="13"
+                                                   Foreground="{Binding FileTypeIcon.Brush}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Title}"
+                                               Foreground="{DynamicResource ForegroundPrimary}"
+                                               FontSize="{Binding ViewModel.Settings.TabFontSize, ElementName=RootWindow}"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="NoWrap"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,2,0" />
+                                            <TextBlock Grid.Column="2"
+                                                   Classes="TabPinIcon"
+                                                   Text="&#xE718;"
+                                                   FontFamily="Segoe Fluent Icons"
+                                                   ToolTip.Tip="Pinned tab"
+                                                   IsVisible="{Binding IsPinnedIndicatorVisible}" />
+                                            <Border Grid.Column="3"
+                                            Width="7"
+                                            Height="7"
+                                            CornerRadius="3.5"
+                                            Background="{DynamicResource AccentBrush}"
+                                            BorderBrush="{DynamicResource ForegroundOnAccent}"
+                                            BorderThickness="1"
+                                            VerticalAlignment="Center"
+                                            IsVisible="{Binding IsDirty}" />
+                                            <Button Grid.Column="4"
+                                            Classes="TabClose"
+                                            ToolTip.Tip="Close"
+                                            IsVisible="{Binding IsCloseButtonVisible}"
+                                            Click="OnTabCloseClick"
+                                            Tag="{Binding}">
+                                        <TextBlock Text="&#xE711;"
+                                                   FontFamily="Segoe Fluent Icons"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource ForegroundPrimary}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </TabControl.ItemTemplate>
+                        <TabControl.ContentTemplate>
+                            <DataTemplate x:DataType="vm:EditorTabViewModel">
+                                <Grid>
+                                    <Border IsVisible="{Binding IsCloseButtonVisible}">
+                                        <views:EditorView DataContext="{Binding Editor}" />
+                                    </Border>
+                                    <ScrollViewer IsVisible="{Binding IsWelcomeTab}"
+                                                  HorizontalScrollBarVisibility="Disabled"
+                                                  VerticalScrollBarVisibility="Auto">
+                                        <Grid HorizontalAlignment="Stretch"
+                                              MaxWidth="900"
+                                              Margin="24,24,24,24">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Spacing="12">
+                                                <TextBlock Text="Notepad Pro"
+                                                           FontSize="28"
+                                                           FontWeight="Light"
+                                                           Foreground="{DynamicResource ForegroundPrimary}" />
+                                                <TextBlock Text="Editing evolved"
+                                                           FontSize="20"
+                                                           Foreground="{DynamicResource ForegroundMuted}" />
+
+                                                <TextBlock Text="Start"
+                                                           Margin="0,8,0,0"
+                                                           FontSize="18"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource ForegroundPrimary}" />
+
+                                                <StackPanel Spacing="4">
+                                                    <Button HorizontalAlignment="Left" Background="Transparent" BorderBrush="Transparent" Padding="0" Click="OnGreetingNewFileClick">
+                                                        <TextBlock Text="New File..." Foreground="{DynamicResource WelcomeLinkBrush}" FontSize="14" />
+                                                    </Button>
+                                                    <Button HorizontalAlignment="Left" Background="Transparent" BorderBrush="Transparent" Padding="0" Click="OnGreetingOpenFileClick">
+                                                        <TextBlock Text="Open File..." Foreground="{DynamicResource WelcomeLinkBrush}" FontSize="14" />
+                                                    </Button>
+                                                    <Button HorizontalAlignment="Left" Background="Transparent" BorderBrush="Transparent" Padding="0" Click="OnGreetingOpenFolderClick">
+                                                        <TextBlock Text="Open Folder..." Foreground="{DynamicResource WelcomeLinkBrush}" FontSize="14" />
+                                                    </Button>
+                                                    <Button HorizontalAlignment="Left" Background="Transparent" BorderBrush="Transparent" Padding="0" Click="OnGreetingOpenWorkspaceClick">
+                                                        <TextBlock Text="Open Workspace..." Foreground="{DynamicResource WelcomeLinkBrush}" FontSize="14" />
+                                                    </Button>
+                                                    <Button HorizontalAlignment="Left" Background="Transparent" BorderBrush="Transparent" Padding="0" Click="OnGreetingCreateWorkspaceClick">
+                                                        <TextBlock Text="Create New Workspace..." Foreground="{DynamicResource WelcomeLinkBrush}" FontSize="14" />
+                                                    </Button>
+                                                </StackPanel>
+
+                                                <TextBlock Text="Recent Workspaces"
+                                                           Margin="0,12,0,0"
+                                                           FontSize="18"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource ForegroundPrimary}" />
+
+                                                <TextBlock Text="No recent workspaces"
+                                                           Foreground="{DynamicResource ForegroundMuted}"
+                                                           IsVisible="{Binding !ViewModel.HasRecentWorkspaces, ElementName=RootWindow, Mode=OneWay}" />
+
+                                                <ItemsControl ItemsSource="{Binding ViewModel.RecentWorkspaces, ElementName=RootWindow}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:RecentProjectItem">
+                                                            <Button HorizontalAlignment="Stretch"
+                                                                    HorizontalContentAlignment="Left"
+                                                                    Background="Transparent"
+                                                                    BorderBrush="Transparent"
+                                                                    Padding="0"
+                                                                    Tag="{Binding}"
+                                                                    Click="OnGreetingRecentProjectClick">
+                                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                                    <TextBlock Text="{Binding DisplayName}"
+                                                                               Foreground="{DynamicResource WelcomeLinkBrush}"
+                                                                               FontSize="14"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               TextWrapping="NoWrap" />
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding Path}"
+                                                                               Foreground="{DynamicResource ForegroundMuted}"
+                                                                               FontSize="12"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               TextWrapping="NoWrap" />
+                                                                </Grid>
+                                                            </Button>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <TextBlock Text="Recent Files &amp; Folders"
+                                                           Margin="0,12,0,0"
+                                                           FontSize="18"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource ForegroundPrimary}" />
+
+                                                <TextBlock Text="No recent files or folders"
+                                                           Foreground="{DynamicResource ForegroundMuted}"
+                                                           IsVisible="{Binding ViewModel.HasNoRecentFilesAndFolders, ElementName=RootWindow, Mode=OneWay}" />
+
+                                                <ItemsControl ItemsSource="{Binding ViewModel.RecentFolders, ElementName=RootWindow}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:RecentProjectItem">
+                                                            <Button HorizontalAlignment="Stretch"
+                                                                    HorizontalContentAlignment="Left"
+                                                                    Background="Transparent"
+                                                                    BorderBrush="Transparent"
+                                                                    Padding="0"
+                                                                    Tag="{Binding}"
+                                                                    Click="OnGreetingRecentProjectClick">
+                                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                                    <TextBlock Text="{Binding DisplayName}"
+                                                                               Foreground="{DynamicResource WelcomeLinkBrush}"
+                                                                               FontSize="14"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               TextWrapping="NoWrap" />
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding Path}"
+                                                                               Foreground="{DynamicResource ForegroundMuted}"
+                                                                               FontSize="12"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               TextWrapping="NoWrap" />
+                                                                </Grid>
+                                                            </Button>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <ItemsControl ItemsSource="{Binding ViewModel.RecentFiles, ElementName=RootWindow}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:RecentFileItem">
+                                                            <Button HorizontalAlignment="Stretch"
+                                                                    HorizontalContentAlignment="Left"
+                                                                    Background="Transparent"
+                                                                    BorderBrush="Transparent"
+                                                                    Padding="0"
+                                                                    Tag="{Binding}"
+                                                                    Click="OnGreetingRecentFileClick"
+                                                                    ToolTip.Tip="{Binding Tooltip}">
+                                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                                    <TextBlock Text="{Binding DisplayName}"
+                                                                               Foreground="{DynamicResource WelcomeLinkBrush}"
+                                                                               FontSize="14"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               TextWrapping="NoWrap" />
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding Path}"
+                                                                               Foreground="{DynamicResource ForegroundMuted}"
+                                                                               FontSize="12"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               TextWrapping="NoWrap" />
+                                                                </Grid>
+                                                            </Button>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </Grid>
+                            </DataTemplate>
+                        </TabControl.ContentTemplate>
+                    </TabControl>
+
+                    <!-- WebView2 host: Monaco editor (TypeScript/HTML/CSS).
+                         Offset by 30 px (tab strip height) so the tab bar remains visible. -->
+                    <views:WebViewHost x:Name="EditorWebView" IsVisible="True" Margin="0,30,0,0" />
+                </Grid>
+            </Border>
+
+            <GridSplitter x:Name="RightToolPanelSplitter"
+                          Grid.Column="3"
+                          Width="4"
+                          Background="Transparent"
+                          ResizeBehavior="PreviousAndNext" />
+
+            <Border x:Name="ToolPanelRightHost"
+                    Grid.Column="4"
+                    Background="{DynamicResource ToolPanelBackground}"
+                    BorderBrush="{DynamicResource BorderMedium}"
+                    BorderThickness="1,0,0,0"
+                    ClipToBounds="True">
+                <Grid RowDefinitions="Auto,*">
+                    <Border Background="{DynamicResource TitleBarBackground}" Padding="10,8"
+                            IsVisible="{Binding !IsExplorerVisible}">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Button Grid.Column="0"
+                                    Width="28"
+                                    Height="28"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="0"
+                                    IsVisible="{Binding !IsExplorerVisible}"
+                                    ToolTip.Tip="Close"
+                                    Command="{Binding CloseToolPanelCommand}">
+                                <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons" FontSize="12" Foreground="{DynamicResource ForegroundPrimary}" />
+                            </Button>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding ToolPanelTitle}"
+                                       Foreground="{DynamicResource ForegroundPrimary}"
+                                       Margin="8,0,0,0"
+                                       FontSize="{Binding Settings.PanelHeaderFontSize}" />
+                        </Grid>
+                    </Border>
+                    <ContentControl Grid.Row="1" Content="{Binding ToolPanelViewModel}" />
+                </Grid>
+            </Border>
+
+            <!-- MinimapView hidden: Monaco's built-in minimap replaces it -->
+            <Border Grid.Column="5"
+                    Background="{DynamicResource EditorBackground}"
+                    BorderBrush="Transparent"
+                    BorderThickness="0"
+                    Width="{Binding MinimapWidth}"
+                    ClipToBounds="True"
+                    IsVisible="False"
+                    IsHitTestVisible="False">
+                <Border.Transitions>
+                    <Transitions>
+                        <DoubleTransition Property="Width" Duration="0:0:0.2" />
+                    </Transitions>
+                </Border.Transitions>
+                <views:MinimapView x:Name="EditorMinimap" DataContext="{Binding Editor}" />
+            </Border>
+
+            <!-- Custom scrollbar hidden: Monaco's built-in scrollbar replaces it -->
+                <Border Grid.Column="6"
+                    Background="{DynamicResource ScrollbarTrack}"
+                    IsVisible="False"
+                    ClipToBounds="True">
+                <Canvas x:Name="ScrollbarCanvas" Background="Transparent">
+                        <Border x:Name="ScrollbarThumb"
+                            Background="#50808080"
+                            CornerRadius="0"
+                            IsHitTestVisible="False"
+                            Opacity="{DynamicResource ScrollbarOpacityValue}" />
+                        <Border x:Name="ScrollbarCursorIndicator"
+                            Height="2"
+                            Background="{DynamicResource AccentBrush}"
+                            IsHitTestVisible="False"
+                            Opacity="{DynamicResource ScrollbarOpacityValue}" />
+                </Canvas>
+            </Border>
+        </Grid>
+
+        <Border Grid.ColumnSpan="3"
+                Grid.Row="2"
+                Background="{DynamicResource StatusBarBackground}"
+                BorderBrush="{DynamicResource StatusBarBackground}"
+                BorderThickness="0,1,0,0"
+                IsVisible="{Binding Settings.IsStatusBarVisible}">
+            <Grid Margin="8,4" HorizontalAlignment="Right">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding Settings.Encoding}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" />
+                <TextBlock Grid.Column="1" Text="{Binding Settings.Indentation}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
+                <TextBlock Grid.Column="2" Text="{Binding Settings.Eol}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
+                <TextBlock Grid.Column="3" Text="{Binding Settings.FileType}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
+                <TextBlock Grid.Column="4" Text="{Binding Editor.WordCount, StringFormat=Words: {0}}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
+                <TextBlock Grid.Column="5" Text="{Binding LineColumnText}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
+            </Grid>
+        </Border>
+
+        <Border Grid.ColumnSpan="3"
+                Grid.RowSpan="3"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,12,34"
+                Width="250"
+                Padding="10"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderMedium}"
+                BorderThickness="1"
+                CornerRadius="6"
+                IsVisible="{Binding IsZoomFlyoutOpen}">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Zoom"
+                           Foreground="{DynamicResource ForegroundPrimary}"
+                           FontWeight="SemiBold" />
+                <Slider Minimum="0"
+                        Maximum="{Binding ZoomSliderMax}"
+                        Value="{Binding ZoomSliderIndex, Mode=TwoWay}"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True" />
+                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6">
+                    <Button Grid.Column="0" Content="80%" Tag="80" Padding="6,2" Click="OnZoomPresetClick" />
+                    <Button Grid.Column="1" Content="100%" Tag="100" Padding="6,2" Click="OnZoomPresetClick" />
+                    <Button Grid.Column="2" Content="125%" Tag="125" Padding="6,2" Click="OnZoomPresetClick" />
+                    <Button Grid.Column="3" Content="150%" Tag="150" Padding="6,2" Click="OnZoomPresetClick" />
+                    <Button Grid.Column="4" Content="200%" Tag="200" Padding="6,2" Click="OnZoomPresetClick" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border x:Name="MarkdownToolbarAnchor"
+            Grid.ColumnSpan="3"
+            Grid.RowSpan="3"
+            Width="0"
+            Height="0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            IsHitTestVisible="False" />
+
+        <Popup x:Name="MarkdownToolbarPopup"
+               IsOpen="{Binding IsMarkdownToolbarShown}"
+               PlacementTarget="{Binding #MarkdownToolbarAnchor}"
+             Placement="BottomEdgeAlignedLeft"
+               HorizontalOffset="{Binding MarkdownToolbarX}"
+               VerticalOffset="{Binding MarkdownToolbarY}"
+               IsLightDismissEnabled="False"
+               OverlayDismissEventPassThrough="False"
+               WindowManagerAddShadowHint="False">
+            <Border x:Name="MarkdownToolbar"
+                    Padding="6"
+                    CornerRadius="8"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource BorderMedium}"
+                    Background="{DynamicResource PanelBackground}"
+                    Opacity="{Binding MarkdownToolbarOpacity}"
+                    PointerPressed="OnMarkdownToolbarPointerPressed"
+                    PointerMoved="OnMarkdownToolbarPointerMoved"
+                    PointerReleased="OnMarkdownToolbarPointerReleased">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <Border Classes="MarkdownToolbarHandle" ToolTip.Tip="Drag Toolbar">
+                        <TextBlock Text="&#xE76F;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="10"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+
+                    <Button Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Preview">
+                        <TextBlock Text="&#xE8A1;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownHeading" ToolTip.Tip="Heading (Shift: Decrease)">
+                        <TextBlock Text="H1" FontWeight="Bold" FontSize="11" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownBulletedList" ToolTip.Tip="Bulleted List (Shift: Numbered)">
+                        <TextBlock Text="&#xE8FD;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownNumberedList" ToolTip.Tip="Numbered List (Shift: Bulleted)">
+                        <TextBlock Text="&#xE8EF;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownBold" ToolTip.Tip="Bold">
+                        <TextBlock Text="&#xE8DD;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownItalic" ToolTip.Tip="Italic">
+                        <TextBlock Text="&#xE8DB;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownInlineCode" ToolTip.Tip="Code">
+                        <TextBlock Text="&#xE943;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownLink" ToolTip.Tip="Link">
+                        <TextBlock Text="&#xE71B;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+
+                    <Border Width="1" Margin="4,2" Background="{DynamicResource BorderSubtle}" />
+
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownToolbarOpacityDown" ToolTip.Tip="Decrease Opacity (1%)">
+                        <TextBlock Text="&#xE738;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Border Padding="4,0"
+                            MinWidth="44"
+                            Height="28"
+                            VerticalAlignment="Center"
+                            CornerRadius="4"
+                            PointerWheelChanged="OnMarkdownToolbarOpacityPercentWheel"
+                            ToolTip.Tip="Scroll to adjust opacity (1%)">
+                        <TextBlock Text="{Binding MarkdownToolbarOpacityText}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="11" />
+                    </Border>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownToolbarOpacityUp" ToolTip.Tip="Increase Opacity (1%)">
+                        <TextBlock Text="&#xE710;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownToolbarPinToggle" ToolTip.Tip="Pin To Drag Bar">
+                        <TextBlock Text="&#xE840;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                    <Button Classes="MarkdownToolbarButton" Click="OnMarkdownToolbarHide" ToolTip.Tip="Hide Toolbar">
+                        <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Popup>
+    </Grid>
+
+</Window>

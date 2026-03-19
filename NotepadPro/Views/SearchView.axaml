@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NotepadPro.ViewModels"
+             x:Class="NotepadPro.Views.SearchView"
+             x:DataType="vm:SearchViewModel">
+    <UserControl.Styles>
+        <Style Selector="Button.SearchAction">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="MinWidth" Value="24" />
+            <Setter Property="MinHeight" Value="24" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.SearchAction:pointerover">
+            <Setter Property="Background" Value="#20FFFFFF" />
+        </Style>
+        <Style Selector="ToggleButton.SearchToggle">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="MinWidth" Value="24" />
+            <Setter Property="MinHeight" Value="24" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleButton.SearchToggle:pointerover">
+            <Setter Property="Background" Value="#20FFFFFF" />
+        </Style>
+        <Style Selector="ToggleButton.SearchToggle:checked">
+            <Setter Property="Background" Value="#30FFFFFF" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <!-- Scrollbar auto-hide for results -->
+        <Style Selector="ScrollViewer.SearchScroll /template/ ScrollBar">
+            <Setter Property="Opacity" Value="{DynamicResource ScrollbarOpacityValue}" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="ScrollViewer.SearchScroll:pointerover /template/ ScrollBar">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Background="{DynamicResource PanelBackground}" RowDefinitions="Auto,Auto,*" Margin="8,4,8,0">
+        <!-- Row 0: Search input with inline option toggles -->
+        <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <TextBox Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                     Watermark="Search"
+                     HorizontalAlignment="Stretch" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" Margin="4,0,0,0" VerticalAlignment="Center">
+                <ToggleButton Classes="SearchToggle" IsChecked="{Binding MatchCase}" ToolTip.Tip="Match Case">
+                    <TextBlock Text="Aa" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ForegroundPrimary}" />
+                </ToggleButton>
+                <ToggleButton Classes="SearchToggle" IsChecked="{Binding WholeWord}" ToolTip.Tip="Match Whole Word">
+                    <TextBlock Text="ab" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ForegroundPrimary}" TextDecorations="Underline" />
+                </ToggleButton>
+            </StackPanel>
+        </Grid>
+
+        <!-- Row 1: Replace input -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,2,0,4">
+            <TextBox Text="{Binding ReplaceText, UpdateSourceTrigger=PropertyChanged}"
+                     Watermark="Replace"
+                     HorizontalAlignment="Stretch" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" Margin="4,0,0,0" VerticalAlignment="Center">
+                <Button Classes="SearchAction" ToolTip.Tip="Replace" Command="{Binding ReplaceCommand}">
+                    <TextBlock Text="AB" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ForegroundPrimary}" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Row 2: Results count + list -->
+        <Grid Grid.Row="2" RowDefinitions="Auto,*">
+            <TextBlock Text="{Binding ResultCount, StringFormat={}{0} results}"
+                       Foreground="{DynamicResource ForegroundMuted}"
+                       FontSize="11"
+                       Margin="4,2,0,4" />
+            <ScrollViewer Grid.Row="1" Classes="SearchScroll"
+                          HorizontalScrollBarVisibility="Hidden"
+                          VerticalScrollBarVisibility="Auto">
+                <ListBox x:Name="ResultsList" ItemsSource="{Binding Results}" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Spacing="1" Margin="0,2">
+                                <TextBlock Text="{Binding Preview}" Foreground="{DynamicResource ForegroundPrimary}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Foreground="{DynamicResource ForegroundMuted}" FontSize="10">
+                                    <Run Text="Ln " /><Run Text="{Binding Line}" /><Run Text=", Col " /><Run Text="{Binding Column}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

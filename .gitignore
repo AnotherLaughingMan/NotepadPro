@@ -1,0 +1,75 @@
+# ============================================================
+# .NET / C#
+# ============================================================
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+.vs/
+publish/
+TestResults/
+*_i.c
+*_p.c
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+packages/
+!**/packages/build/
+
+# ============================================================
+# Node / TypeScript / Vite (webview)
+# ============================================================
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# ============================================================
+# Artifacts — compiled outputs and release binaries
+# ============================================================
+artifacts/publish/
+artifacts/releases/*.exe
+artifacts/releases/*.zip
+artifacts/releases/installme-lite-publish/
+
+# ============================================================
+# Runtime / local logs
+# ============================================================
+run.err
+run.out
+*.log
+
+# ============================================================
+# OS / editor cruft
+# ============================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+*.stackdump
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# ============================================================
+# Keep these
+# ============================================================
+# NotepadPro/wwwroot/ is the Vite build output consumed at
+# runtime — keep it in source control so clones work without
+# a separate 'npm run build' step.
+!NotepadPro/wwwroot/

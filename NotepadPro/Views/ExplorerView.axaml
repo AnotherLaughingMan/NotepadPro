@@ -1,0 +1,317 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NotepadPro.ViewModels"
+             x:Class="NotepadPro.Views.ExplorerView"
+             x:CompileBindings="False"
+             x:DataType="vm:ExplorerViewModel"
+             x:Name="ExplorerRoot">
+    <UserControl.Styles>
+        <Style Selector="Border.SectionHeader">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="6,0,4,0" />
+            <Setter Property="Height" Value="26" />
+        </Style>
+        <Style Selector="Border.SectionHeader:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TabHoverBackground}" />
+        </Style>
+        <Style Selector="ScrollViewer.ExplorerScroll /template/ ScrollBar">
+            <Setter Property="Opacity" Value="{DynamicResource ScrollbarOpacityValue}" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="ScrollViewer.ExplorerScroll:pointerover /template/ ScrollBar">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="Button.ExplorerAction">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="MinWidth" Value="18" />
+            <Setter Property="MinHeight" Value="18" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.ExplorerAction:pointerover">
+            <Setter Property="Background" Value="#20FFFFFF" />
+        </Style>
+        <Style Selector="Button.HeaderChevron">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="MinWidth" Value="18" />
+            <Setter Property="MinHeight" Value="18" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.HeaderChevron:pointerover">
+            <Setter Property="Background" Value="#20FFFFFF" />
+        </Style>
+        <Style Selector="Button.OpenEditorItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.OpenEditorItem:pointerover">
+            <Setter Property="Background" Value="#20FFFFFF" />
+            <Setter Property="CornerRadius" Value="2" />
+        </Style>
+        <Style Selector="Button.FlatExplorerRow">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="MinHeight" Value="22" />
+        </Style>
+        <Style Selector="Button.FlatExplorerRow:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TabHoverBackground}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Background="{DynamicResource PanelBackground}" RowDefinitions="Auto,Auto,Auto,*" Margin="0,0,0,2">
+        <Border Grid.Row="0" Classes="SectionHeader" x:Name="ExplorerSectionHeader">
+            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <TextBlock Text="EXPLORER"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource ForegroundPrimary}"
+                           VerticalAlignment="Center"
+                           Margin="4,0,0,0" />
+                <Button Grid.Column="1"
+                        Classes="ExplorerAction"
+                        IsVisible="{Binding #ExplorerSectionHeader.IsPointerOver}"
+                        ToolTip.Tip="Views and Actions"
+                        Click="OnOpenSectionsMenu">
+                    <TextBlock Text="&#xE712;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                    <Button.ContextMenu>
+                        <ContextMenu Placement="BottomEdgeAlignedRight">
+                            <MenuItem Header="Open Editors" ToggleType="CheckBox" IsChecked="{Binding IsOpenEditorsVisible, Mode=TwoWay}" />
+                            <MenuItem Header="Folders" ToggleType="CheckBox" IsChecked="{Binding IsFilesVisible, Mode=TwoWay}" />
+                            <MenuItem Header="Recently Closed" ToggleType="CheckBox" IsChecked="{Binding IsRecentEditorsVisible, Mode=TwoWay}" />
+                            <Separator />
+                            <MenuItem Header="Reset Explorer Layout" Click="OnResetExplorerLayout" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Classes="SectionHeader" IsVisible="{Binding IsOpenEditorsVisible}" x:Name="OpenEditorsSectionHeader">
+            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                <Button Classes="HeaderChevron" Click="OnToggleOpenEditorsSection">
+                    <Grid>
+                        <TextBlock Text="&#xE70D;" FontFamily="Segoe Fluent Icons" FontSize="10" IsVisible="{Binding IsOpenEditorsExpanded}" Foreground="{DynamicResource ForegroundPrimary}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <TextBlock Text="&#xE76C;" FontFamily="Segoe Fluent Icons" FontSize="10" IsVisible="{Binding !IsOpenEditorsExpanded}" Foreground="{DynamicResource ForegroundPrimary}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Grid>
+                </Button>
+                <TextBlock Grid.Column="1"
+                           Text="OPEN EDITORS"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource ForegroundPrimary}"
+                           VerticalAlignment="Center"
+                           Margin="4,0,0,0"
+                           TextTrimming="CharacterEllipsis"
+                           TextWrapping="NoWrap" />
+                <StackPanel Grid.Column="2"
+                            IsVisible="{Binding #OpenEditorsSectionHeader.IsPointerOver}"
+                            Orientation="Horizontal"
+                            Spacing="3"
+                            VerticalAlignment="Center">
+                    <Button Classes="ExplorerAction" ToolTip.Tip="New Untitled File" Click="OnNewUntitledFile">
+                        <TextBlock Text="&#xE8A5;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                    </Button>
+                    <Button Classes="ExplorerAction" ToolTip.Tip="Save All" Click="OnSaveAll">
+                        <TextBlock Text="&#xEA35;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                    </Button>
+                    <Button Classes="ExplorerAction" ToolTip.Tip="Close All Editors" Click="OnCloseAll">
+                        <TextBlock Text="&#xECC9;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ItemsControl Grid.Row="2"
+                      IsVisible="{Binding IsOpenEditorsSectionVisible}"
+                      ItemsSource="{Binding OpenEditors}"
+                      Margin="0,0,0,4">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="18,*,Auto,18" Margin="0,0,0,1">
+                        <TextBlock Text="&#xE8A5;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundInactive}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <Button Grid.Column="1" Classes="OpenEditorItem" Tag="{Binding}" Click="OnOpenEditorClick">
+                            <TextBlock Text="{Binding Title}" FontSize="12" Foreground="{DynamicResource ForegroundPrimary}" TextTrimming="CharacterEllipsis" />
+                        </Button>
+                        <TextBlock Grid.Column="2"
+                                   Text="&#xE718;"
+                                   FontFamily="Segoe Fluent Icons"
+                                   FontSize="10"
+                                   Margin="0,0,4,0"
+                                   Foreground="{DynamicResource ForegroundMuted}"
+                                   VerticalAlignment="Center"
+                                   IsVisible="{Binding IsPinnedIndicatorVisible}" />
+                        <Button Grid.Column="3" Classes="ExplorerAction" Tag="{Binding}" Click="OnCloseEditorClick" ToolTip.Tip="Close">
+                            <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <ScrollViewer Grid.Row="3" Classes="ExplorerScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+            <StackPanel>
+                <Border Classes="SectionHeader"
+                        IsVisible="{Binding IsRecentEditorsVisible}"
+                        x:Name="RecentEditorsSectionHeader"
+                        HorizontalAlignment="Left"
+                        Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                    <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                        <Button Classes="HeaderChevron" Click="OnToggleRecentEditorsSection">
+                            <Grid>
+                                <TextBlock Text="&#xE70D;" FontFamily="Segoe Fluent Icons" FontSize="10" IsVisible="{Binding IsRecentEditorsExpanded}" Foreground="{DynamicResource ForegroundPrimary}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <TextBlock Text="&#xE76C;" FontFamily="Segoe Fluent Icons" FontSize="10" IsVisible="{Binding !IsRecentEditorsExpanded}" Foreground="{DynamicResource ForegroundPrimary}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            </Grid>
+                        </Button>
+                        <TextBlock Grid.Column="1"
+                                   Text="RECENTLY CLOSED"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource ForegroundPrimary}"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,0,0"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap" />
+                        <StackPanel Grid.Column="2"
+                                    IsVisible="{Binding #RecentEditorsSectionHeader.IsPointerOver}"
+                                    Orientation="Horizontal"
+                                    Spacing="3"
+                                    VerticalAlignment="Center">
+                            <Button Classes="ExplorerAction" ToolTip.Tip="Clear Recently Closed" Click="OnClearRecentEditors">
+                                <TextBlock Text="&#xE74D;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <ItemsControl IsVisible="{Binding IsRecentEditorsSectionVisible}"
+                              ItemsSource="{Binding RecentEditors}"
+                              Margin="0,0,0,4">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Classes="OpenEditorItem" Tag="{Binding}" Click="OnOpenRecentEditorClick">
+                                <TextBlock Text="{Binding Title}" FontSize="12" Foreground="{DynamicResource ForegroundPrimary}" TextTrimming="CharacterEllipsis" />
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Classes="SectionHeader"
+                        IsVisible="{Binding IsFilesVisible}"
+                        x:Name="FilesSectionHeader"
+                        HorizontalAlignment="Left"
+                        Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                    <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                        <Button Classes="HeaderChevron" Click="OnToggleFilesSection">
+                            <Grid>
+                                <TextBlock Text="&#xE70D;" FontFamily="Segoe Fluent Icons" FontSize="10" IsVisible="{Binding IsFilesExpanded}" Foreground="{DynamicResource ForegroundPrimary}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <TextBlock Text="&#xE76C;" FontFamily="Segoe Fluent Icons" FontSize="10" IsVisible="{Binding !IsFilesExpanded}" Foreground="{DynamicResource ForegroundPrimary}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            </Grid>
+                        </Button>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding ExplorerTitle}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource ForegroundPrimary}"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,6,0"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap">
+                            <TextBlock.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Fold All" Click="OnFoldAllFromWorkspaceTitle" />
+                                    <MenuItem Header="Unfold All" Click="OnUnfoldAllFromWorkspaceTitle" />
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                        <StackPanel Grid.Column="2"
+                                    IsVisible="{Binding #FilesSectionHeader.IsPointerOver}"
+                                    Orientation="Horizontal"
+                                    Spacing="3"
+                                    VerticalAlignment="Center">
+                            <Button Classes="ExplorerAction" ToolTip.Tip="Open Folder" Click="OnOpenFolder">
+                                <TextBlock Text="&#xE8E5;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                            </Button>
+                            <Button Classes="ExplorerAction" ToolTip.Tip="New File" Click="OnNewFileInRoot">
+                                <TextBlock Text="&#xE7C3;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                            </Button>
+                            <Button Classes="ExplorerAction" ToolTip.Tip="New Folder" Click="OnNewFolderInRoot">
+                                <TextBlock Text="&#xE8F4;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                            </Button>
+                            <Button Classes="ExplorerAction" ToolTip.Tip="Refresh Explorer" Click="OnRefreshExplorer">
+                                <TextBlock Text="&#xE72C;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                            </Button>
+                            <Button Classes="ExplorerAction" ToolTip.Tip="Collapse All Folders" Click="OnCollapseAllExplorerFolders">
+                                <TextBlock Text="&#xE74A;" FontFamily="Segoe Fluent Icons" FontSize="10" Foreground="{DynamicResource ForegroundPrimary}" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <StackPanel IsVisible="{Binding IsFilesSectionVisible}" Margin="0,2,0,6">
+                    <ItemsControl ItemsSource="{Binding Items}"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Classes="FlatExplorerRow"
+                                        Click="OnFlatItemClick"
+                                        ToolTip.Tip="{Binding FullPath}">
+                                    <Grid ColumnDefinitions="Auto,16,16,*" VerticalAlignment="Center">
+                                        <Border Width="{Binding IndentWidth}" />
+                                        <Grid Grid.Column="1" IsVisible="{Binding IsFolder}">
+                                            <TextBlock Text="&#xE70D;" IsVisible="{Binding IsExpanded}"
+                                                       FontFamily="Segoe Fluent Icons" FontSize="8"
+                                                       Foreground="{DynamicResource ForegroundInactive}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Text="&#xE76C;" IsVisible="{Binding !IsExpanded}"
+                                                       FontFamily="Segoe Fluent Icons" FontSize="8"
+                                                       Foreground="{DynamicResource ForegroundInactive}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>
+                                        <TextBlock Grid.Column="2" Text="&#xE8B7;" IsVisible="{Binding IsFolder}"
+                                                   FontFamily="Segoe Fluent Icons" FontSize="10"
+                                                   Foreground="{DynamicResource ForegroundInactive}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="&#xE8A5;" IsVisible="{Binding !IsFolder}"
+                                                   FontFamily="Segoe Fluent Icons" FontSize="10"
+                                                   Foreground="{DynamicResource ForegroundInactive}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="3" Text="{Binding Name}"
+                                                   Foreground="{DynamicResource ForegroundPrimary}" FontSize="12"
+                                                   VerticalAlignment="Center" Margin="3,0,4,0"
+                                                   TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NotepadPro.ViewModels"
+             xmlns:views="using:NotepadPro.Views"
+             x:Class="NotepadPro.Views.MinimapView"
+             x:DataType="vm:EditorViewModel"
+             ClipToBounds="True">
+    <Grid x:Name="MinimapRoot">
+        <Border Background="{DynamicResource MinimapBackground}">
+            <views:MinimapRenderControl x:Name="MinimapRender"
+                                        IsHitTestVisible="False" />
+        </Border>
+
+        <Canvas x:Name="MinimapOverlayCanvas" Background="Transparent" ClipToBounds="True">
+            <Border x:Name="MinimapHoverBand"
+                    Background="#0DFFFFFF"
+                    IsHitTestVisible="False"
+                    IsVisible="False"
+                    CornerRadius="2" />
+
+            <Border x:Name="MinimapViewportIndicator"
+                    Background="#66808080"
+                    BorderBrush="#99B7B7B7"
+                    BorderThickness="1"
+                    CornerRadius="3"
+                    IsHitTestVisible="False" />
+        </Canvas>
+    </Grid>
+</UserControl>

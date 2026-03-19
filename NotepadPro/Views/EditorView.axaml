@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NotepadPro.ViewModels"
+             xmlns:conv="using:NotepadPro.Converters"
+             xmlns:v="using:NotepadPro.Views"
+             xmlns:ae="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+             x:Class="NotepadPro.Views.EditorView"
+             x:DataType="vm:EditorViewModel">
+    <UserControl.Resources>
+        <conv:BoolToTextWrappingConverter x:Key="BoolToTextWrappingConverter" />
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource EditorSurface}">
+        <Grid x:Name="EditorLayoutGrid" ColumnDefinitions="*,Auto,*">
+            <ae:TextEditor x:Name="EditorTextBox"
+                           Grid.Column="0"
+                           IsReadOnly="{Binding IsFolded}"
+                           ShowLineNumbers="{Binding Settings.ShowLineNumbers}"
+                           ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                           WordWrap="{Binding Settings.WordWrap}"
+                           FontFamily="Consolas"
+                           FontSize="{Binding Settings.EditorFontSize}"
+                           Background="{DynamicResource EditorSurface}"
+                           Foreground="{DynamicResource ForegroundPrimary}"
+                           BorderThickness="0"
+                           BorderBrush="Transparent"
+                           Padding="4" />
+
+            <GridSplitter x:Name="PreviewSplitter"
+                          Grid.Column="1"
+                          Width="4"
+                          Background="{DynamicResource BorderSubtle}"
+                          ResizeBehavior="PreviousAndNext"
+                          IsVisible="{Binding IsMarkdownPreviewActive}" />
+
+            <Border x:Name="PreviewPane"
+                    Grid.Column="2"
+                    Background="{DynamicResource EditorBackground}"
+                    BorderBrush="{DynamicResource BorderSubtle}"
+                    BorderThickness="1,0,0,0"
+                    IsVisible="{Binding IsMarkdownPreviewActive}">
+                <ScrollViewer x:Name="PreviewScrollViewer"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="PreviewContentHost"
+                                Margin="28,22"
+                                Spacing="8"
+                                MaxWidth="860"
+                                HorizontalAlignment="Center" />
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

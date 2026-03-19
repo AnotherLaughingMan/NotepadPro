@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "webview",
+			"name": "webview (TypeScript)"
+		}
+	],
+	"settings": {
+		"powershell.cwd": "Notepad Pro"
+	}
+}

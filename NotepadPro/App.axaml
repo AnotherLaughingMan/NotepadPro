@@ -1,0 +1,78 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="NotepadPro.App"
+             xmlns:local="using:NotepadPro"
+             RequestedThemeVariant="Dark">
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <!-- Theme palette – values are overwritten at runtime by ThemeService -->
+        <SolidColorBrush x:Key="PanelBackground" Color="#1E1E1E" />
+        <SolidColorBrush x:Key="SideBarBackground" Color="#1F1F1F" />
+        <SolidColorBrush x:Key="EditorBackground" Color="#1E1E1E" />
+        <SolidColorBrush x:Key="EditorSurface" Color="#252526" />
+        <SolidColorBrush x:Key="TitleBarBackground" Color="#1C1C1C" />
+        <SolidColorBrush x:Key="MenuBarBackground" Color="#2A2A2A" />
+        <SolidColorBrush x:Key="StatusBarBackground" Color="#007ACC" />
+        <SolidColorBrush x:Key="TabBarBackground" Color="#252526" />
+        <SolidColorBrush x:Key="ActiveTabBackground" Color="#1E1E1E" />
+        <SolidColorBrush x:Key="InactiveTabBackground" Color="#2D2D2D" />
+        <SolidColorBrush x:Key="TabHoverBackground" Color="#2A2D2E" />
+        <SolidColorBrush x:Key="ToolPanelBackground" Color="#1B1B1B" />
+        <SolidColorBrush x:Key="MinimapBackground" Color="#1B1B1B" />
+        <SolidColorBrush x:Key="LineNumberGutter" Color="#1B1B1B" />
+        <SolidColorBrush x:Key="CurrentLineHighlight" Color="#2A2D2E" />
+        <SolidColorBrush x:Key="InputBackground" Color="#3C3C3C" />
+        <SolidColorBrush x:Key="IconButtonHover" Color="#383838" />
+        <SolidColorBrush x:Key="SelectionBrush" Color="#6644AAFF" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#007ACC" />
+        <SolidColorBrush x:Key="WelcomeLinkBrush" Color="#4BA3E3" />
+        <SolidColorBrush x:Key="ButtonAccentBrush" Color="#0E639C" />
+        <SolidColorBrush x:Key="ForegroundPrimary" Color="#D4D4D4" />
+        <SolidColorBrush x:Key="ForegroundSecondary" Color="#CCCCCC" />
+        <SolidColorBrush x:Key="ForegroundMuted" Color="#858585" />
+        <SolidColorBrush x:Key="ForegroundDimmed" Color="#6F6F6F" />
+        <SolidColorBrush x:Key="ForegroundInactive" Color="#9E9E9E" />
+        <SolidColorBrush x:Key="ForegroundSectionHeader" Color="#C8C8C8" />
+        <SolidColorBrush x:Key="ForegroundOnAccent" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="BorderSubtle" Color="#2A2A2A" />
+        <SolidColorBrush x:Key="BorderMedium" Color="#3E3E3E" />
+        <SolidColorBrush x:Key="BorderAccent" Color="#3A3A3A" />
+        <SolidColorBrush x:Key="SyntaxKeyword" Color="#C586C0" />
+        <SolidColorBrush x:Key="SyntaxString" Color="#CE9178" />
+        <SolidColorBrush x:Key="SyntaxComment" Color="#6A9955" />
+        <SolidColorBrush x:Key="SyntaxNumber" Color="#B5CEA8" />
+        <SolidColorBrush x:Key="SyntaxType" Color="#4EC9B0" />
+        <x:Double x:Key="ScrollbarOpacityValue">0.5</x:Double>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+
+        <!-- Global styles using DynamicResource for theme switching -->
+        <Style Selector="Window">
+            <Setter Property="Background" Value="{DynamicResource PanelBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
+        </Style>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderMedium}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource ForegroundPrimary}" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
+        </Style>
+        <!-- Semi-transparent scrollbars -->
+        <Style Selector="ScrollBar">
+            <Setter Property="Opacity" Value="{DynamicResource ScrollbarOpacityValue}" />
+        </Style>
+    </Application.Styles>
+</Application>

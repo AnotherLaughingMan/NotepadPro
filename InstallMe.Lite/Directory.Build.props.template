@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <!-- Copy this file to Directory.Build.props and edit values to retarget InstallMe.Lite -->
+    <InstallerTargetAppName>Your App Name</InstallerTargetAppName>
+    <InstallerPublisher>Your Company</InstallerPublisher>
+    <InstallerVersion>1.0.0</InstallerVersion>
+
+    <!-- Path(s) to package zip(s) to embed in the installer EXE -->
+    <PrimaryEmbeddedPackagePath>..\artifacts\releases\YourApp-win-x64-framework-dependent.zip</PrimaryEmbeddedPackagePath>
+    <FallbackEmbeddedPackagePath>..\yourapp_release.zip</FallbackEmbeddedPackagePath>
+  </PropertyGroup>
+</Project>

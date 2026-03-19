@@ -1,0 +1,68 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\notepad_pro.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <UseWindowsForms>true</UseWindowsForms><!-- Auto-version using assembly build/revision numbers; bump major/minor here -->
+    <BaseMajorMinor Condition="&apos;$(BaseMajorMinor)&apos; == &apos;&apos;">1.1</BaseMajorMinor>
+    <Deterministic>false</Deterministic>
+    <Version>$(BaseMajorMinor).0</Version>
+    <AssemblyVersion>$(BaseMajorMinor).*</AssemblyVersion>
+    <FileVersion>$(BaseMajorMinor).0.0</FileVersion>
+    <InformationalVersion>$(BaseMajorMinor).0-$(Configuration)</InformationalVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Models\"/>
+    <AvaloniaResource Include="Assets\**"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.11"/>
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.11"/>
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.9"/>
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11"/>
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.11"/><!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.11">
+      <IncludeAssets Condition="&apos;$(Configuration)&apos; != &apos;Debug&apos;">None</IncludeAssets>
+      <PrivateAssets Condition="&apos;$(Configuration)&apos; != &apos;Debug&apos;">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.4.1"/>
+    <PackageReference Include="AvaloniaEdit.TextMate" Version="11.4.1"/>
+    <PackageReference Include="ReactiveUI" Version="20.2.45"/>
+    <PackageReference Include="Splat" Version="15.3.1"/>
+    <PackageReference Include="System.Drawing.Common" Version="9.0.0"/>
+    <PackageReference Include="TextMateSharp.Grammars" Version="2.0.3"/>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2849.39" GeneratePathProperty="true" ExcludeAssets="build;buildTransitive"/>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="$(PkgMicrosoft_Web_WebView2)\lib_manual\netcoreapp3.0\Microsoft.Web.WebView2.Core.dll"/>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(PkgMicrosoft_Web_WebView2)\runtimes\win-x86\native\WebView2Loader.dll">
+      <Link>runtimes\win-x86\native\WebView2Loader.dll</Link>
+      <Visible>False</Visible>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>false</Pack>
+    </Content>
+    <Content Include="$(PkgMicrosoft_Web_WebView2)\runtimes\win-x64\native\WebView2Loader.dll">
+      <Link>runtimes\win-x64\native\WebView2Loader.dll</Link>
+      <Visible>False</Visible>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>false</Pack>
+    </Content>
+    <Content Include="$(PkgMicrosoft_Web_WebView2)\runtimes\win-arm64\native\WebView2Loader.dll">
+      <Link>runtimes\win-arm64\native\WebView2Loader.dll</Link>
+      <Visible>False</Visible>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>false</Pack>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- wwwroot is the Vite build output (webview/ → npm run build).
+         Copy it alongside the executable so WebView2 can serve it via
+         SetVirtualHostNameToFolderMapping. -->
+    <Content Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

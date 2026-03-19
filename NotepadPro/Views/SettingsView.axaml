@@ -1,0 +1,208 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NotepadPro.ViewModels"
+             x:Class="NotepadPro.Views.SettingsView"
+             x:ClassModifier="public"
+             x:DataType="vm:SettingsViewModel">
+    <UserControl.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="FontSize" Value="{Binding UiFontSize}" />
+        </Style>
+        <Style Selector="ToggleSwitch">
+            <Setter Property="FontSize" Value="{Binding UiFontSize}" />
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="FontSize" Value="{Binding UiFontSize}" />
+        </Style>
+    </UserControl.Styles>
+    <Grid Background="{DynamicResource PanelBackground}" RowDefinitions="Auto,*" Margin="16">
+        <TextBlock Text="Settings" FontSize="{Binding UiFontSize}" Foreground="{DynamicResource ForegroundPrimary}" Margin="4,0,0,12" />
+
+        <TabControl Grid.Row="1" TabStripPlacement="Left">
+            <TabControl.Styles>
+                <Style Selector="TabItem">
+                    <Setter Property="MinWidth" Value="160" />
+                    <Setter Property="Padding" Value="12,8" />
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                </Style>
+            </TabControl.Styles>
+
+            <TabItem Header="Editor">
+                <ScrollViewer Margin="12,8">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Editor" FontSize="{Binding UiFontSize}" Foreground="{DynamicResource ForegroundSectionHeader}" />
+                        <ToggleSwitch Content="Word Wrap" IsChecked="{Binding WordWrap}" HorizontalAlignment="Left" />
+                        <ToggleSwitch Content="Show Line Numbers" IsChecked="{Binding ShowLineNumbers}" HorizontalAlignment="Left" />
+                        <ToggleSwitch Content="Show Minimap" IsChecked="{Binding IsMinimapVisible}" HorizontalAlignment="Left" />
+                        <ToggleSwitch Content="Auto Indentation" IsChecked="{Binding AutoIndentation}" HorizontalAlignment="Left" />
+                        <ToggleSwitch Content="Auto Bracketing" IsChecked="{Binding AutoBracketing}" HorizontalAlignment="Left" />
+                        <ToggleSwitch Content="Restore open documents on startup"
+                                      IsChecked="{Binding RestoreOpenDocumentsOnStartup}"
+                                      HorizontalAlignment="Left" />
+                        <ToggleSwitch Content="Auto-detect and offer to open .code-workspace in opened folders"
+                                      IsChecked="{Binding AutoOpenDetectedWorkspaces}"
+                                      HorizontalAlignment="Left" />
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Default New File Type" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding DefaultNewFileTypeOptions}"
+                                      SelectedItem="{Binding DefaultNewFileType}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Scroll Speed" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding ScrollSpeedOptions}"
+                                      SelectedItem="{Binding ScrollSpeed}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Tilt-Scroll Speed" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding ScrollSpeedOptions}"
+                                      SelectedItem="{Binding TiltScrollSpeed}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Scrollbar Opacity" Foreground="{DynamicResource ForegroundMuted}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding ScrollbarOpacity, StringFormat={}{0:P0}}" Foreground="{DynamicResource ForegroundMuted}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Slider Minimum="0.1"
+                                    Maximum="1.0"
+                                    Value="{Binding ScrollbarOpacity}"
+                                    TickFrequency="0.05"
+                                    IsSnapToTickEnabled="True"
+                                    Width="240"
+                                    HorizontalAlignment="Left"
+                                    AutomationProperties.Name="Scrollbar Opacity" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Minimap Fade Speed" Foreground="{DynamicResource ForegroundMuted}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding MinimapFadeSpeedMs, StringFormat={}{0:0} ms}" Foreground="{DynamicResource ForegroundMuted}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Slider Minimum="60"
+                                    Maximum="600"
+                                    Value="{Binding MinimapFadeSpeedMs}"
+                                    TickFrequency="10"
+                                    IsSnapToTickEnabled="True"
+                                    Width="240"
+                                    HorizontalAlignment="Left"
+                                    AutomationProperties.Name="Minimap Fade Speed" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Fonts">
+                <ScrollViewer Margin="12,8">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Fonts" FontSize="{Binding UiFontSize}" Foreground="{DynamicResource ForegroundSectionHeader}" />
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Editor Font Size" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding FontSizeOptions}"
+                                      SelectedItem="{Binding EditorFontSize}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="UI Font Size" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding FontSizeOptions}"
+                                      SelectedItem="{Binding UiFontSize}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Menu Font Size" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding FontSizeOptions}"
+                                      SelectedItem="{Binding MenuFontSize}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Tab Font Size" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding FontSizeOptions}"
+                                      SelectedItem="{Binding TabFontSize}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Status Bar Font Size" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding StatusBarFontSizeOptions}"
+                                      SelectedItem="{Binding StatusBarFontSize}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Rail Icon Size" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding RailIconSizeOptions}"
+                                      SelectedItem="{Binding RailIconSize}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Panel Header Font Size" Foreground="{DynamicResource ForegroundMuted}" />
+                            <ComboBox ItemsSource="{Binding FontSizeOptions}"
+                                      SelectedItem="{Binding PanelHeaderFontSize}"
+                                      Width="160"
+                                      HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Auto Save">
+                <ScrollViewer Margin="12,8">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Auto Save" FontSize="{Binding UiFontSize}" Foreground="{DynamicResource ForegroundSectionHeader}" />
+                        <ComboBox ItemsSource="{Binding AutoSaveModes}"
+                                  SelectedItem="{Binding AutoSaveMode}"
+                                  Width="260"
+                                  HorizontalAlignment="Left" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Formatting">
+                <ScrollViewer Margin="12,8">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Formatting" FontSize="{Binding UiFontSize}" Foreground="{DynamicResource ForegroundSectionHeader}" />
+                        <ComboBox ItemsSource="{Binding IndentationOptions}"
+                                  SelectedItem="{Binding Indentation}"
+                                  Width="260"
+                                  HorizontalAlignment="Left" />
+                        <ComboBox ItemsSource="{Binding EolOptions}"
+                                  SelectedItem="{Binding Eol}"
+                                  Width="260"
+                                  HorizontalAlignment="Left" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Encoding">
+                <ScrollViewer Margin="12,8">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Encoding" FontSize="{Binding UiFontSize}" Foreground="{DynamicResource ForegroundSectionHeader}" />
+                        <ComboBox ItemsSource="{Binding EncodingOptions}"
+                                  SelectedItem="{Binding Encoding}"
+                                  Width="260"
+                                  HorizontalAlignment="Left" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Theme">
+                <ScrollViewer Margin="12,8">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Theme" FontSize="{Binding UiFontSize}" Foreground="{DynamicResource ForegroundSectionHeader}" />
+                        <ComboBox ItemsSource="{Binding ThemeOptions}"
+                                  SelectedItem="{Binding Theme}"
+                                  Width="260"
+                                  HorizontalAlignment="Left" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
