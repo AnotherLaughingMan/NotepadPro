@@ -2,6 +2,8 @@
 
 A modern, Monaco-powered text and code editor for Windows — built with Avalonia and WebView2.
 
+[![Contributing](https://img.shields.io/badge/CONTRIBUTING-%F0%9F%91%8D-brightgreen)](CONTRIBUTING.md)
+
 Notepad Pro brings VS Code-quality editing to a lightweight native desktop app. It is designed for developers, writers, and power users who want a fast, themeable editor without the overhead of a full IDE.
 
 ---
@@ -135,9 +137,7 @@ See [InstallMe.Lite/README.md](InstallMe.Lite/README.md) for instructions on bui
 
 ## Contributing
 
-Contributions, bug reports, and feature suggestions are welcome.
-
-Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+Contributions, bug reports, and feature suggestions are welcome. Please read the [Code of Conduct](CODE_OF_CONDUCT.md) and the [Contributing Guidelines](CONTRIBUTING.md) before participating. Issue and PR templates are available to help format reports and pull requests.
 
 1. Fork the repository.
 2. Create a feature branch: `git checkout -b feature/my-feature`

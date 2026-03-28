@@ -73,3 +73,6 @@ $RECYCLE.BIN/
 # runtime — keep it in source control so clones work without
 # a separate 'npm run build' step.
 !NotepadPro/wwwroot/
+
+# Ignore local Copilot instruction file moved into .github
+.github/copilot-instructions.md
