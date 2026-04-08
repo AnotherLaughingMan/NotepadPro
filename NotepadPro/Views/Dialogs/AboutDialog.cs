@@ -17,7 +17,7 @@ public sealed class AboutDialog : Window
         Background = Res("PanelBackground");
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        var versionText = version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "1.0.0";
+        var versionText = version != null ? $"{version.Major}.{version.Minor}.0" : "1.0.0";
 
         var root = new StackPanel { Margin = new Thickness(24), Spacing = 8 };
 
