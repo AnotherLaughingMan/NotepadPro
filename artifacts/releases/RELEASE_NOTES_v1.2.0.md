@@ -26,6 +26,7 @@
 
 ---
 
-
 ### Release Assets
-- InstallMe.Lite installer: InstallMe.Lite.exe`n- Framework-dependent app package: NotepadPro-v1.2.0-win-x64-framework-dependent.zip`n
+
+- Installer (InstallMe.Lite): `NotepadPro-v1.2.0-20260408-004522.exe`
+- App package (framework-dependent, win-x64): `NotepadPro-v1.2.0-win-x64-framework-dependent.zip`
