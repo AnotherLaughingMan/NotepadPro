@@ -25,3 +25,7 @@
 - Added a dedicated `Lua (*.lua)` dropdown option.
 
 ---
+
+
+### Release Assets
+- InstallMe.Lite installer: InstallMe.Lite.exe`n- Framework-dependent app package: NotepadPro-v1.2.0-win-x64-framework-dependent.zip`n
