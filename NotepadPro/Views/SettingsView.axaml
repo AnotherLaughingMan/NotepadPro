@@ -36,6 +36,12 @@
                         <ToggleSwitch Content="Show Minimap" IsChecked="{Binding IsMinimapVisible}" HorizontalAlignment="Left" />
                         <ToggleSwitch Content="Auto Indentation" IsChecked="{Binding AutoIndentation}" HorizontalAlignment="Left" />
                         <ToggleSwitch Content="Auto Bracketing" IsChecked="{Binding AutoBracketing}" HorizontalAlignment="Left" />
+                        <ToggleSwitch Content="Clean Copying (trim leading/trailing spaces on copy)"
+                                      IsChecked="{Binding CleanCopyEnabled}"
+                                      HorizontalAlignment="Left" />
+                        <ToggleSwitch Content="Detect JSON from content for unknown file extensions"
+                                      IsChecked="{Binding DetectJsonFromContent}"
+                                      HorizontalAlignment="Left" />
                         <ToggleSwitch Content="Restore open documents on startup"
                                       IsChecked="{Binding RestoreOpenDocumentsOnStartup}"
                                       HorizontalAlignment="Left" />

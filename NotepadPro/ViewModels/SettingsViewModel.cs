@@ -11,6 +11,8 @@ public sealed class SettingsViewModel : ViewModelBase
     private bool _isMinimapVisible = true;
     private bool _autoIndentation = true;
     private bool _autoBracketing = true;
+    private bool _cleanCopyEnabled = true;
+    private bool _detectJsonFromContent = true;
     private bool _renderWhitespace = false;
     private bool _isActivityBarVisible = true;
     private string _activityBarPosition = "Left";
@@ -161,6 +163,18 @@ public sealed class SettingsViewModel : ViewModelBase
     {
         get => _autoBracketing;
         set => this.RaiseAndSetIfChanged(ref _autoBracketing, value);
+    }
+
+    public bool CleanCopyEnabled
+    {
+        get => _cleanCopyEnabled;
+        set => this.RaiseAndSetIfChanged(ref _cleanCopyEnabled, value);
+    }
+
+    public bool DetectJsonFromContent
+    {
+        get => _detectJsonFromContent;
+        set => this.RaiseAndSetIfChanged(ref _detectJsonFromContent, value);
     }
 
     public bool RenderWhitespace
@@ -498,6 +512,8 @@ public sealed class SettingsViewModel : ViewModelBase
         IsMinimapVisible = data.IsMinimapVisible;
         AutoIndentation = data.AutoIndentation;
         AutoBracketing = data.AutoBracketing;
+        CleanCopyEnabled = data.CleanCopyEnabled;
+        DetectJsonFromContent = data.DetectJsonFromContent;
         RenderWhitespace = data.RenderWhitespace;
         IsActivityBarVisible = data.IsActivityBarVisible;
         ActivityBarPosition = data.ActivityBarPosition;
@@ -548,6 +564,8 @@ public sealed class SettingsViewModel : ViewModelBase
             IsMinimapVisible = IsMinimapVisible,
             AutoIndentation = AutoIndentation,
             AutoBracketing = AutoBracketing,
+            CleanCopyEnabled = CleanCopyEnabled,
+            DetectJsonFromContent = DetectJsonFromContent,
             RenderWhitespace = RenderWhitespace,
             IsActivityBarVisible = IsActivityBarVisible,
             ActivityBarPosition = ActivityBarPosition,

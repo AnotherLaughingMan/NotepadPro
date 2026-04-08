@@ -79,6 +79,10 @@ public sealed class SettingsData
 
     public bool AutoBracketing { get; set; } = true;
 
+    public bool CleanCopyEnabled { get; set; } = true;
+
+    public bool DetectJsonFromContent { get; set; } = true;
+
     public bool RenderWhitespace { get; set; } = false;
 
     public bool IsActivityBarVisible { get; set; } = true;

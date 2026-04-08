@@ -30,6 +30,23 @@ Complete all items before cutting a new version:
 ### Fixed
 - Placeholder for upcoming bug fixes.
 
+## [1.2.0] - 2026-04-08
+
+### Added
+- Added Clean Copying as a settings toggle to trim leading and trailing whitespace during copy operations.
+- Added JSON content-detection fallback for unknown or extensionless files, with tolerant parsing for comments and trailing commas.
+- Added explicit Starbound-style JSON-like extension mappings, including `.patch`, `.recipe`, `.item`, `.object`, `.frames`, and additional game data extensions.
+- Added Lua language support across detection and editor tooling, including TextMate grammar mapping, code folding eligibility, and Monaco language mapping.
+- Added a dedicated `Lua (*.lua)` file type entry in Open and Save As dialog dropdowns.
+
+### Changed
+- Changed Open and Save As dialogs from a single broad text filter to categorized file type groups (Plain Text, Markdown, JSON, Starbound JSON-like, XML/XAML, C#, C/C++, Web, Lua, Scripts, and All Supported files).
+- Changed `.config` handling to keep XML default behavior while allowing JSON classification when content detection is enabled and content is valid JSON.
+
+### Fixed
+- Fixed Lua files opening as plain text by wiring `.lua` detection through both desktop and webview editor language paths.
+- Fixed syntax highlighting coverage gaps by adding Lua token highlighting in the fallback syntax highlighter.
+
 ## [1.1.9574] - 2026-03-19
 
 ### Added

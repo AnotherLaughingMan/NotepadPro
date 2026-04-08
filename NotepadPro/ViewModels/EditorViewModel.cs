@@ -343,7 +343,7 @@ public sealed class EditorViewModel : ViewModelBase
     /// <summary>Updates caret position directly from a 1-based line/column pair (e.g. from Monaco).</summary>
     public void UpdateCaretPosition(int line, int column)
     {
-        CaretLine   = Math.Max(1, line);
+        CaretLine = Math.Max(1, line);
         CaretColumn = Math.Max(1, column);
     }
 
@@ -502,7 +502,10 @@ public sealed class EditorViewModel : ViewModelBase
 
     private void UpdateLanguageFromPath(string path)
     {
-        Language = TextMateLanguageService.DetectLanguageFromPath(path);
+        Language = TextMateLanguageService.DetectLanguageFromPath(
+            path,
+            Text,
+            _settings.DetectJsonFromContent);
         UpdateMarkdownPreviewText();
         this.RaisePropertyChanged(nameof(IsMarkdown));
         this.RaisePropertyChanged(nameof(IsMarkdownPreviewActive));

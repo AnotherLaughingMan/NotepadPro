@@ -1738,18 +1738,7 @@ public partial class MainWindow : Window
         var options = new FilePickerOpenOptions
         {
             AllowMultiple = false,
-            FileTypeFilter = new List<FilePickerFileType>
-            {
-                new("Text Files")
-                {
-                    Patterns = new List<string>
-                    {
-                        "*.txt", "*.md", "*.json", "*.xml", "*.cs", "*.xaml", "*.axaml",
-                        "*.c", "*.h", "*.cpp", "*.cc", "*.cxx", "*.hpp", "*.hh", "*.hxx"
-                    }
-                },
-                FilePickerFileTypes.All
-            }
+            FileTypeFilter = BuildEditorFileTypeChoices(includeAllFiles: true)
         };
 
         var result = await StorageProvider.OpenFilePickerAsync(options);
@@ -1761,22 +1750,80 @@ public partial class MainWindow : Window
         var options = new FilePickerSaveOptions
         {
             SuggestedFileName = ViewModel?.Editor.FileName ?? "Untitled",
-            FileTypeChoices = new List<FilePickerFileType>
-            {
-                new("Text Files")
-                {
-                    Patterns = new List<string>
-                    {
-                        "*.txt", "*.md", "*.json", "*.xml", "*.cs", "*.xaml", "*.axaml",
-                        "*.c", "*.h", "*.cpp", "*.cc", "*.cxx", "*.hpp", "*.hh", "*.hxx"
-                    }
-                },
-                FilePickerFileTypes.All
-            }
+            FileTypeChoices = BuildEditorFileTypeChoices(includeAllFiles: true)
         };
 
         var result = await StorageProvider.SaveFilePickerAsync(options);
         return result?.TryGetLocalPath();
+    }
+
+    private static List<FilePickerFileType> BuildEditorFileTypeChoices(bool includeAllFiles)
+    {
+        var choices = new List<FilePickerFileType>
+        {
+            new("All Supported Text/Code Files")
+            {
+                Patterns = new List<string>
+                {
+                    "*.txt", "*.text", "*.log",
+                    "*.md", "*.markdown", "*.mdown", "*.mkd",
+                    "*.json", "*.jsonc", "*.json5", "*.patch", "*.recipe", "*.item", "*.object", "*.frames", "*.config", "*.modinfo",
+                    "*.xml", "*.xsd", "*.xsl", "*.xslt", "*.svg", "*.resx", "*.props", "*.targets", "*.xaml", "*.axaml",
+                    "*.cs", "*.csx", "*.cake",
+                    "*.c", "*.h", "*.cpp", "*.cc", "*.cxx", "*.c++", "*.hh", "*.hpp", "*.hxx", "*.inl", "*.ipp", "*.tpp",
+                    "*.js", "*.jsx", "*.ts", "*.tsx", "*.html", "*.htm", "*.css", "*.scss", "*.less",
+                    "*.py", "*.lua", "*.ps1", "*.psm1", "*.psd1", "*.ps1xml", "*.sh", "*.bash", "*.zsh", "*.fish",
+                    "*.yml", "*.yaml", "*.sql", "*.java", "*.go", "*.rs", "*.php", "*.rb", "*.swift", "*.kt", "*.kts", "*.r"
+                }
+            },
+            new("Plain Text")
+            {
+                Patterns = new List<string> { "*.txt", "*.text", "*.log" }
+            },
+            new("Markdown")
+            {
+                Patterns = new List<string> { "*.md", "*.markdown", "*.mdown", "*.mkd" }
+            },
+            new("JSON")
+            {
+                Patterns = new List<string> { "*.json", "*.jsonc", "*.json5" }
+            },
+            new("Starbound JSON-Like")
+            {
+                Patterns = new List<string> { "*.patch", "*.recipe", "*.item", "*.object", "*.frames", "*.config", "*.modinfo" }
+            },
+            new("XML / XAML")
+            {
+                Patterns = new List<string> { "*.xml", "*.xsd", "*.xsl", "*.xslt", "*.svg", "*.resx", "*.props", "*.targets", "*.xaml", "*.axaml" }
+            },
+            new("C#")
+            {
+                Patterns = new List<string> { "*.cs", "*.csx", "*.cake" }
+            },
+            new("C / C++")
+            {
+                Patterns = new List<string> { "*.c", "*.h", "*.cpp", "*.cc", "*.cxx", "*.c++", "*.hh", "*.hpp", "*.hxx", "*.inl", "*.ipp", "*.tpp" }
+            },
+            new("Web")
+            {
+                Patterns = new List<string> { "*.html", "*.htm", "*.css", "*.scss", "*.less", "*.js", "*.jsx", "*.ts", "*.tsx" }
+            },
+            new("Lua")
+            {
+                Patterns = new List<string> { "*.lua" }
+            },
+            new("Scripts")
+            {
+                Patterns = new List<string> { "*.py", "*.lua", "*.ps1", "*.psm1", "*.psd1", "*.ps1xml", "*.sh", "*.bash", "*.zsh", "*.fish" }
+            }
+        };
+
+        if (includeAllFiles)
+        {
+            choices.Add(FilePickerFileTypes.All);
+        }
+
+        return choices;
     }
 
     private void OnEditUndo(object? sender, RoutedEventArgs e) => TryEditorAction(tb => tb.Undo());
@@ -1785,7 +1832,42 @@ public partial class MainWindow : Window
 
     private void OnEditCut(object? sender, RoutedEventArgs e) => TryEditorAction(tb => tb.Cut());
 
-    private void OnEditCopy(object? sender, RoutedEventArgs e) => TryEditorAction(tb => tb.Copy());
+    private async void OnEditCopy(object? sender, RoutedEventArgs e)
+    {
+        var editor = FindEditorTextEditor();
+        if (editor == null)
+        {
+            return;
+        }
+
+        if (ViewModel?.Settings.CleanCopyEnabled != true)
+        {
+            editor.Copy();
+            return;
+        }
+
+        var selectedText = editor.SelectedText;
+        if (string.IsNullOrEmpty(selectedText))
+        {
+            editor.Copy();
+            return;
+        }
+
+        try
+        {
+            if (Clipboard == null)
+            {
+                editor.Copy();
+                return;
+            }
+
+            await Clipboard.SetTextAsync(selectedText.Trim());
+        }
+        catch
+        {
+            editor.Copy();
+        }
+    }
 
     private void OnEditPaste(object? sender, RoutedEventArgs e) => TryEditorAction(tb => tb.Paste());
 
@@ -3546,8 +3628,8 @@ public partial class MainWindow : Window
         }
 
         var editor = vm.Editor;
-        var path   = editor.FilePath ?? string.Empty;
-        var lang   = editor.Language ?? "plaintext";
+        var path = editor.FilePath ?? string.Empty;
+        var lang = editor.Language ?? "plaintext";
         _webBridge.SendViewEditor();
         _webBridge.SendFileOpen(path, editor.Text, lang);
         RefreshActiveEditorBookmarks();
@@ -3721,16 +3803,16 @@ public partial class MainWindow : Window
 
     private static EditorBridgeSettings BuildBridgeSettings(MainWindowViewModel vm) => new()
     {
-        WordWrap         = vm.Settings.WordWrap,
-        ShowLineNumbers  = vm.Settings.ShowLineNumbers,
+        WordWrap = vm.Settings.WordWrap,
+        ShowLineNumbers = vm.Settings.ShowLineNumbers,
         IsMinimapVisible = vm.Settings.IsMinimapVisible,
         MinimapFadeSpeedMs = (int)Math.Clamp(vm.Settings.MinimapFadeSpeedMs, 60, 2000),
-        AutoIndentation  = vm.Settings.AutoIndentation,
-        AutoBracketing   = vm.Settings.AutoBracketing,
+        AutoIndentation = vm.Settings.AutoIndentation,
+        AutoBracketing = vm.Settings.AutoBracketing,
         RenderWhitespace = vm.Settings.RenderWhitespace,
-        EditorFontSize   = (int)vm.Settings.EditorFontSize,
-        Indentation      = vm.Settings.Indentation,
-        Eol              = vm.Settings.Eol,
+        EditorFontSize = (int)vm.Settings.EditorFontSize,
+        Indentation = vm.Settings.Indentation,
+        Eol = vm.Settings.Eol,
     };
 
     private static ThemeColorsBridge BuildBridgeTheme()
@@ -3750,16 +3832,16 @@ public partial class MainWindow : Window
 
         return new ThemeColorsBridge
         {
-            Background          = Brush("EditorBackground"),
-            Foreground          = Brush("ForegroundPrimary"),
+            Background = Brush("EditorBackground"),
+            Foreground = Brush("ForegroundPrimary"),
             SelectionBackground = Brush("SelectionBackground"),
-            LineHighlight       = Brush("CurrentLineHighlight"),
-            SyntaxKeyword       = Brush("SyntaxKeyword"),
-            SyntaxString        = Brush("SyntaxString"),
-            SyntaxComment       = Brush("SyntaxComment"),
-            SyntaxNumber        = Brush("SyntaxNumber"),
-            SyntaxType          = Brush("SyntaxType"),
-            SyntaxFunction      = Brush("SyntaxFunction"),
+            LineHighlight = Brush("CurrentLineHighlight"),
+            SyntaxKeyword = Brush("SyntaxKeyword"),
+            SyntaxString = Brush("SyntaxString"),
+            SyntaxComment = Brush("SyntaxComment"),
+            SyntaxNumber = Brush("SyntaxNumber"),
+            SyntaxType = Brush("SyntaxType"),
+            SyntaxFunction = Brush("SyntaxFunction"),
         };
     }
 

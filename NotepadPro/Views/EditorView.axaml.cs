@@ -286,7 +286,7 @@ public partial class EditorView : UserControl
     {
         return language switch
         {
-            "C#" or "C" or "C++" or "JavaScript" or "TypeScript" or "JSON" or "Python" or "HTML" or "CSS" or "XML" or "XAML" or "AXAML" => true,
+            "C#" or "C" or "C++" or "JavaScript" or "TypeScript" or "JSON" or "Python" or "Lua" or "HTML" or "CSS" or "XML" or "XAML" or "AXAML" => true,
             _ => false
         };
     }
@@ -600,6 +600,7 @@ public partial class EditorView : UserControl
             "JSON" => "json",
             "Markdown" => "markdown",
             "Python" => "python",
+            "Lua" => "lua",
             "HTML" => "html",
             "CSS" => "css",
             "XML" => "xml",

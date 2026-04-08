@@ -33,6 +33,18 @@ public static class SyntaxHighlightService
 
     private static readonly Regex XmlTags = new("</?[^>]+>", RegexOptions.Compiled);
     private static readonly Regex XmlStrings = new("\"[^\"]*\"", RegexOptions.Compiled);
+    private static readonly Regex LuaKeywords = new(
+        "\\b(and|break|do|else|elseif|end|false|for|function|goto|if|in|local|nil|not|or|repeat|return|then|true|until|while)\\b",
+        RegexOptions.Compiled);
+    private static readonly Regex LuaStrings = new(
+        "\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'|\\[(=*)\\[(.|\\r|\\n)*?\\]\\1\\]",
+        RegexOptions.Compiled);
+    private static readonly Regex LuaComments = new(
+        "--\\[(=*)\\[(.|\\r|\\n)*?\\]\\1\\]|--.*?$",
+        RegexOptions.Compiled | RegexOptions.Multiline);
+    private static readonly Regex LuaNumbers = new(
+        "\\b(?:0[xX][0-9a-fA-F]+|\\d+(?:\\.\\d+)?(?:[eE][+\\-]?\\d+)?)\\b",
+        RegexOptions.Compiled);
 
     public static IReadOnlyList<Inline> Build(string text, string language)
     {
@@ -64,6 +76,12 @@ public static class SyntaxHighlightService
             case "XAML":
                 AddSpans(spans, XmlTags, KeywordBrush, text);
                 AddSpans(spans, XmlStrings, StringBrush, text);
+                break;
+            case "Lua":
+                AddSpans(spans, LuaComments, CommentBrush, text);
+                AddSpans(spans, LuaStrings, StringBrush, text);
+                AddSpans(spans, LuaKeywords, KeywordBrush, text);
+                AddSpans(spans, LuaNumbers, NumberBrush, text);
                 break;
         }
 

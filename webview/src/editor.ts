@@ -104,6 +104,7 @@ function toMonacoLanguage(displayName: string): string {
     'axaml':       'xml',
     'yaml':        'yaml',
     'python':      'python',
+    'lua':         'lua',
     'rust':        'rust',
     'go':          'go',
     'java':        'java',

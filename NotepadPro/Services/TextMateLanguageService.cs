@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text.Json;
 using TextMateSharp.Grammars;
 
 namespace NotepadPro.Services;
 
 public static class TextMateLanguageService
 {
+    private const int MaxJsonSniffLength = 1_000_000;
     private static readonly Lazy<RegistryOptions> Registry = new(() => new RegistryOptions(ThemeName.DarkPlus));
     private static readonly IReadOnlyDictionary<string, string> ExtensionDisplayNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
@@ -36,6 +38,45 @@ public static class TextMateLanguageService
         [".json"] = "JSON",
         [".jsonc"] = "JSON",
         [".json5"] = "JSON",
+        [".patch"] = "JSON",
+        [".recipe"] = "JSON",
+        [".item"] = "JSON",
+        [".object"] = "JSON",
+        [".frames"] = "JSON",
+        [".npctype"] = "JSON",
+        [".particle"] = "JSON",
+        [".particlesource"] = "JSON",
+        [".macros"] = "JSON",
+        [".questtemplate"] = "JSON",
+        [".species"] = "JSON",
+        [".cursor"] = "JSON",
+        [".weather"] = "JSON",
+        [".aimission"] = "JSON",
+        [".animation"] = "JSON",
+        [".stagehand"] = "JSON",
+        [".treasurepools"] = "JSON",
+        [".treasurechests"] = "JSON",
+        [".dance"] = "JSON",
+        [".cinematic"] = "JSON",
+        [".functions"] = "JSON",
+        [".tenant"] = "JSON",
+        [".collection"] = "JSON",
+        [".namesource"] = "JSON",
+        [".radiomessages"] = "JSON",
+        [".augment"] = "JSON",
+        [".consumable"] = "JSON",
+        [".harvestingtool"] = "JSON",
+        [".miningtool"] = "JSON",
+        [".flashlight"] = "JSON",
+        [".tillingtool"] = "JSON",
+        [".painttool"] = "JSON",
+        [".wiretool"] = "JSON",
+        [".activeitem"] = "JSON",
+        [".effectsource"] = "JSON",
+        [".matmod"] = "JSON",
+        [".configfunctions"] = "JSON",
+        [".2functions"] = "JSON",
+        [".modinfo"] = "JSON",
         [".xml"] = "XML",
         [".xsd"] = "XML",
         [".xsl"] = "XML",
@@ -73,6 +114,7 @@ public static class TextMateLanguageService
         [".rs"] = "Rust",
         [".php"] = "PHP",
         [".rb"] = "Ruby",
+        [".lua"] = "Lua",
         [".swift"] = "Swift",
         [".kt"] = "Kotlin",
         [".kts"] = "Kotlin",
@@ -84,13 +126,15 @@ public static class TextMateLanguageService
         ["dockerfile"] = "Dockerfile",
         ["makefile"] = "Makefile",
         ["readme.md"] = "Markdown",
+        ["_metadata"] = "JSON",
+        [".metadata"] = "JSON",
     };
 
-    public static string DetectLanguageFromPath(string path)
+    public static string DetectLanguageFromPath(string path, string? fileText = null, bool detectJsonFromContent = false)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
-            return "Plain Text";
+            return detectJsonFromContent && IsJsonContent(fileText) ? "JSON" : "Plain Text";
         }
 
         var fileName = Path.GetFileName(path);
@@ -102,11 +146,18 @@ public static class TextMateLanguageService
         var extension = Path.GetExtension(fileName);
         if (string.IsNullOrWhiteSpace(extension))
         {
-            return "Plain Text";
+            return detectJsonFromContent && IsJsonContent(fileText) ? "JSON" : "Plain Text";
         }
 
         if (ExtensionDisplayNames.TryGetValue(extension, out var extensionLanguage))
         {
+            if (string.Equals(extension, ".config", StringComparison.OrdinalIgnoreCase)
+                && detectJsonFromContent
+                && IsJsonContent(fileText))
+            {
+                return "JSON";
+            }
+
             return extensionLanguage;
         }
 
@@ -126,6 +177,11 @@ public static class TextMateLanguageService
         }
         catch
         {
+        }
+
+        if (detectJsonFromContent && IsJsonContent(fileText))
+        {
+            return "JSON";
         }
 
         return "Plain Text";
@@ -204,6 +260,8 @@ public static class TextMateLanguageService
             "rust" => "Rust",
             "php" => "PHP",
             "ruby" => "Ruby",
+            "lua" => "Lua",
+            "source.lua" => "Lua",
             "swift" => "Swift",
             "kotlin" => "Kotlin",
             "r" => "R",
@@ -228,5 +286,39 @@ public static class TextMateLanguageService
         }
 
         return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(normalized);
+    }
+
+    private static bool IsJsonContent(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || text.Length > MaxJsonSniffLength)
+        {
+            return false;
+        }
+
+        var span = text.AsSpan().TrimStart();
+        if (span.IsEmpty)
+        {
+            return false;
+        }
+
+        var firstChar = span[0];
+        if (firstChar != '{' && firstChar != '[')
+        {
+            return false;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(text, new JsonDocumentOptions
+            {
+                CommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true
+            });
+            return document.RootElement.ValueKind is JsonValueKind.Object or JsonValueKind.Array;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
