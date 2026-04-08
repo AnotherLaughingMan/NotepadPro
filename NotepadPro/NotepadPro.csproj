@@ -59,10 +59,9 @@
       <Pack>false</Pack>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <!-- wwwroot is the Vite build output (webview/ → npm run build).
+  <ItemGroup><!-- wwwroot is the Vite build output (webview/ → npm run build).
          Copy it alongside the executable so WebView2 can serve it via
          SetVirtualHostNameToFolderMapping. -->
-    <Content Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 </Project>

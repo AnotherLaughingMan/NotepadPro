@@ -22,17 +22,21 @@ Complete all items before cutting a new version:
 ## [Unreleased]
 
 ### Added
+
 - Placeholder for upcoming additions.
 
 ### Changed
+
 - Placeholder for upcoming behavior changes.
 
 ### Fixed
+
 - Placeholder for upcoming bug fixes.
 
 ## [1.2.0] - 2026-04-08
 
 ### Added
+
 - Added Clean Copying as a settings toggle to trim leading and trailing whitespace during copy operations.
 - Added JSON content-detection fallback for unknown or extensionless files, with tolerant parsing for comments and trailing commas.
 - Added explicit Starbound-style JSON-like extension mappings, including `.patch`, `.recipe`, `.item`, `.object`, `.frames`, and additional game data extensions.
@@ -40,16 +44,19 @@ Complete all items before cutting a new version:
 - Added a dedicated `Lua (*.lua)` file type entry in Open and Save As dialog dropdowns.
 
 ### Changed
+
 - Changed Open and Save As dialogs from a single broad text filter to categorized file type groups (Plain Text, Markdown, JSON, Starbound JSON-like, XML/XAML, C#, C/C++, Web, Lua, Scripts, and All Supported files).
 - Changed `.config` handling to keep XML default behavior while allowing JSON classification when content detection is enabled and content is valid JSON.
 
 ### Fixed
+
 - Fixed Lua files opening as plain text by wiring `.lua` detection through both desktop and webview editor language paths.
 - Fixed syntax highlighting coverage gaps by adding Lua token highlighting in the fallback syntax highlighter.
 
 ## [1.1.9574] - 2026-03-19
 
 ### Added
+
 - Added command palette quick picker for file, navigation, bookmark, recent reopen, theme, encoding, EOL, indentation, and editor-setting actions.
 - Added Goto Anything quick-open flow covering open tabs, recent files, workspace or folder files, bookmarks, :line[:column] jumps, @symbols, and #text matches.
 - Added bookmark list, clear-in-file, and clear-all actions alongside toggle, next, and previous navigation with visible in-editor bookmark markers.
@@ -71,6 +78,7 @@ Complete all items before cutting a new version:
 - Added Help > Markdown Toolbar Shortcuts menu with quick reference entries for markdown toolbar modifier behaviors.
 
 ### Changed
+
 - Expanded the roadmap with a concrete forward plan for power-editor features, grouped into quick wins, medium-complexity work, and major architectural investments inspired by Sublime Text.
 - Changed Ctrl+P to open Goto Anything, while Print remains available from the File menu.
 - Moved bookmark management into the Edit menu and Command Palette instead of keyboard-only access.
@@ -90,6 +98,7 @@ Complete all items before cutting a new version:
 - Updated Help > About with author attribution (AnotherLaughingMan) and framework/API stack details.
 
 ### Fixed
+
 - Fixed bookmark navigation so opening a bookmark moves the visible editor to the bookmarked line instead of only activating the file tab.
 - Fixed line-number gutter jitter by reserving bookmark marker width so text no longer shifts when markers appear.
 - Fixed the floating Markdown toolbar layering by moving the unpinned toolbar into a popup-backed overlay rendered above the editor host surface.

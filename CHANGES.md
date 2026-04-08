@@ -10,18 +10,22 @@ For the full technical changelog, see [CHANGELOG.md](CHANGELOG.md).
 ### New Features
 
 **Clean Copying**
+
 - New setting to trim leading and trailing spaces from selected text when copying.
 
 **Better JSON detection for modding workflows**
+
 - Notepad Pro now detects JSON by file content for unknown or extensionless files.
 - Added support for many Starbound-style JSON-like file extensions (for example `.patch`, `.recipe`, `.item`, `.object`, and related data formats).
 
 **Lua support**
+
 - Lua files are now detected automatically.
 - Lua now has syntax highlighting support in both desktop and webview editor paths.
 - Lua is included in editor grammar mapping and folding support.
 
 **Improved Open/Save As file type list**
+
 - Open and Save As dialogs now show categorized file types instead of one broad text bucket.
 - Added a dedicated `Lua (*.lua)` dropdown option.
 
@@ -38,6 +42,7 @@ Open anything from one keypress. Search open tabs and recent files by name, jump
 Every editor action, theme switch, encoding change, and settings toggle is now reachable from the keyboard without digging through menus.
 
 **Bookmarks — now much more powerful**
+
 - Bookmark any line and navigate between them with keyboard shortcuts.
 - Bookmarks are saved per workspace or folder and swap automatically when you switch projects.
 - Import and export bookmark sets as portable JSON files.
