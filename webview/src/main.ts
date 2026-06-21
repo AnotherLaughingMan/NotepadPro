@@ -27,6 +27,15 @@ import { bridge }               from './bridge';
 import { createEditor, applyBookmarks, applySettings, setContent, getCurrentContent, getCurrentLanguage } from './editor';
 import { applyTheme }           from './theme';
 import { updatePreviewPane }    from './markdown-preview';
+import {
+  mountEditableMarkdown,
+  setEditableMarkdownEnabled,
+  setEditableMarkdownContent,
+  applyEditableMarkdownCommand,
+  getEditableMarkdownSelection,
+  setEditableMarkdownSelection,
+  type EditableMarkdownSelection,
+} from './markdown-editable';
 import { mountWelcome }         from './welcome';
 import type { EditorSettings }  from './types';
 
@@ -61,6 +70,9 @@ const requiredLanguageIds = [
 const editorEl    = document.getElementById('monaco-editor')   as HTMLElement;
 const containerEl = document.getElementById('editor-container') as HTMLElement;
 const previewEl   = document.getElementById('preview-pane')    as HTMLElement;
+const previewScrollbarEl = document.getElementById('preview-scrollbar') as HTMLElement;
+const previewScrollbarThumbEl = document.getElementById('preview-scrollbar-thumb') as HTMLElement;
+const splitterEl  = document.getElementById('preview-splitter') as HTMLElement;
 const welcomeEl   = document.getElementById('welcome-view')    as HTMLElement;
 
 // ── Defaults (overridden immediately by host via 'settings:apply') ────────
@@ -103,13 +115,308 @@ if (missingLanguageIds.length > 0) {
 // ── State ─────────────────────────────────────────────────────────────────
 let savedContent     = '';
 let isPreviewVisible = false;
+let isMarkdownDocument = false;
 let isMinimapEnabled = defaultSettings.isMinimapVisible;
 let isMinimapPointerOver = false;
 let minimapScrollRevealTimer = 0;
 let minimapFadeSpeedMs = Math.max(60, defaultSettings.minimapFadeSpeedMs);
+let previewScrollbarDragging = false;
+let previewScrollbarDragStartY = 0;
+let previewScrollbarDragStartScrollTop = 0;
+let previewScrollbarHideTimer = 0;
 
 const MINIMAP_IDLE_OPACITY = 0;
 const MINIMAP_ACTIVE_OPACITY = 1;
+const MAX_EDITABLE_MARKDOWN_CHARS = 300000;
+const PREVIEW_SCROLLBAR_MIN_THUMB_HEIGHT = 24;
+
+let sourceSelectionBeforeRenderedToggle: monaco.Selection | null = null;
+
+mountEditableMarkdown(previewEl, markdown => {
+  applyRenderedMarkdownTextToSource(markdown);
+  bridge.post({ type: 'markdown:content:update', content: markdown, sourceMode: 'rendered' });
+  updatePreviewScrollbar();
+});
+
+function updatePreviewScrollbar(): void {
+  if (!isPreviewVisible || !previewScrollbarEl || !previewScrollbarThumbEl) {
+    return;
+  }
+
+  const scrollHeight = previewEl.scrollHeight;
+  const clientHeight = previewEl.clientHeight;
+  if (scrollHeight <= clientHeight + 1) {
+    previewScrollbarEl.style.display = 'none';
+    return;
+  }
+
+  const trackHeight = previewScrollbarEl.getBoundingClientRect().height || previewEl.clientHeight;
+  const thumbHeight = Math.max(
+    PREVIEW_SCROLLBAR_MIN_THUMB_HEIGHT,
+    Math.round(trackHeight * clientHeight / Math.max(scrollHeight, 1)),
+  );
+  const maxThumbTop = Math.max(1, trackHeight - thumbHeight);
+  const maxScrollTop = Math.max(1, scrollHeight - clientHeight);
+  const thumbTop = Math.round((previewEl.scrollTop / maxScrollTop) * maxThumbTop);
+
+  previewScrollbarEl.style.display = 'block';
+  previewScrollbarEl.dataset.active = 'true';
+  previewScrollbarThumbEl.style.height = `${thumbHeight}px`;
+  previewScrollbarThumbEl.style.transform = `translateY(${thumbTop}px)`;
+}
+
+function schedulePreviewScrollbarFade(): void {
+  if (!previewScrollbarEl) {
+    return;
+  }
+
+  clearTimeout(previewScrollbarHideTimer);
+  previewScrollbarEl.dataset.active = 'true';
+  previewScrollbarHideTimer = window.setTimeout(() => {
+    if (!isPreviewVisible || previewScrollbarDragging) {
+      return;
+    }
+
+    previewScrollbarEl.dataset.active = 'false';
+  }, 850);
+}
+
+function updatePreviewScrollbarVisibility(): void {
+  if (!previewScrollbarEl || !isPreviewVisible) {
+    return;
+  }
+
+  updatePreviewScrollbar();
+}
+
+function scrollPreviewToScrollbarPosition(clientY: number): void {
+  if (!previewScrollbarEl || !previewScrollbarThumbEl) {
+    return;
+  }
+
+  const trackRect = previewScrollbarEl.getBoundingClientRect();
+  const thumbRect = previewScrollbarThumbEl.getBoundingClientRect();
+  const maxThumbTop = Math.max(1, trackRect.height - thumbRect.height);
+  const maxScrollTop = Math.max(1, previewEl.scrollHeight - previewEl.clientHeight);
+  const relativeY = Math.max(0, Math.min(trackRect.height, clientY - trackRect.top));
+  const nextScrollTop = Math.round((relativeY / maxThumbTop) * maxScrollTop);
+  previewEl.scrollTop = nextScrollTop;
+  updatePreviewScrollbar();
+}
+
+previewEl.addEventListener('scroll', () => {
+  updatePreviewScrollbar();
+  schedulePreviewScrollbarFade();
+  revealMinimapFromScroll();
+});
+
+previewEl.addEventListener('input', () => {
+  updatePreviewScrollbar();
+});
+
+previewEl.addEventListener('mousemove', () => {
+  if (isPreviewVisible) {
+    schedulePreviewScrollbarFade();
+  }
+});
+
+window.addEventListener('resize', () => {
+  updatePreviewScrollbar();
+});
+
+if (previewScrollbarEl && previewScrollbarThumbEl) {
+  previewScrollbarThumbEl.addEventListener('pointerdown', event => {
+    if (!isPreviewVisible) {
+      return;
+    }
+
+    previewScrollbarDragging = true;
+    previewScrollbarDragStartY = event.clientY;
+    previewScrollbarDragStartScrollTop = previewEl.scrollTop;
+    previewScrollbarEl.dataset.dragging = 'true';
+    previewScrollbarEl.dataset.active = 'true';
+    previewScrollbarThumbEl.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+
+  previewScrollbarEl.addEventListener('pointerenter', () => {
+    if (isPreviewVisible) {
+      clearTimeout(previewScrollbarHideTimer);
+      previewScrollbarEl.dataset.active = 'true';
+    }
+  });
+
+  previewScrollbarEl.addEventListener('pointerleave', () => {
+    if (isPreviewVisible && !previewScrollbarDragging) {
+      schedulePreviewScrollbarFade();
+    }
+  });
+
+  previewScrollbarEl.addEventListener('pointermove', event => {
+    if (!previewScrollbarDragging) {
+      return;
+    }
+
+    const trackRect = previewScrollbarEl.getBoundingClientRect();
+    const thumbRect = previewScrollbarThumbEl.getBoundingClientRect();
+    const maxThumbTop = Math.max(1, trackRect.height - thumbRect.height);
+    const maxScrollTop = Math.max(1, previewEl.scrollHeight - previewEl.clientHeight);
+    const deltaY = event.clientY - previewScrollbarDragStartY;
+    previewEl.scrollTop = previewScrollbarDragStartScrollTop + (deltaY / maxThumbTop) * maxScrollTop;
+    updatePreviewScrollbar();
+  });
+
+  const stopDragging = () => {
+    previewScrollbarDragging = false;
+    delete previewScrollbarEl.dataset.dragging;
+    schedulePreviewScrollbarFade();
+  };
+
+  previewScrollbarEl.addEventListener('pointerup', stopDragging);
+  previewScrollbarEl.addEventListener('pointercancel', stopDragging);
+  previewScrollbarEl.addEventListener('lostpointercapture', stopDragging);
+  previewScrollbarEl.addEventListener('pointerdown', event => {
+    if (event.target === previewScrollbarThumbEl) {
+      return;
+    }
+
+    scrollPreviewToScrollbarPosition(event.clientY);
+  });
+}
+
+function isEditableRenderedModeActive(): boolean {
+  return isPreviewVisible && canUseEditableMarkdown(getCurrentContent());
+}
+
+function canUseEditableMarkdown(markdown: string): boolean {
+  return isMarkdownDocument && markdown.length <= MAX_EDITABLE_MARKDOWN_CHARS;
+}
+
+function captureSourceSelectionBeforeRenderedToggle(): void {
+  sourceSelectionBeforeRenderedToggle = editor.getSelection();
+}
+
+function restoreSourceSelectionAfterRenderedToggle(): void {
+  if (!sourceSelectionBeforeRenderedToggle) {
+    return;
+  }
+
+  editor.setSelection(sourceSelectionBeforeRenderedToggle);
+  editor.revealPositionInCenter({
+    lineNumber: sourceSelectionBeforeRenderedToggle.positionLineNumber,
+    column: sourceSelectionBeforeRenderedToggle.positionColumn,
+  });
+  sourceSelectionBeforeRenderedToggle = null;
+}
+
+function monacoSelectionToEditableSelection(selection: monaco.Selection | null): EditableMarkdownSelection | null {
+  if (!selection) {
+    return null;
+  }
+
+  const model = editor.getModel();
+  if (!model) {
+    return null;
+  }
+
+  const startOffset = model.getOffsetAt({ lineNumber: selection.selectionStartLineNumber, column: selection.selectionStartColumn });
+  const endOffset = model.getOffsetAt({ lineNumber: selection.positionLineNumber, column: selection.positionColumn });
+  return { start: startOffset, end: endOffset };
+}
+
+function editableSelectionToMonacoSelection(selection: EditableMarkdownSelection | null): monaco.Selection | null {
+  if (!selection) {
+    return null;
+  }
+
+  const model = editor.getModel();
+  if (!model) {
+    return null;
+  }
+
+  const safeStart = Math.max(0, Math.min(model.getValueLength(), selection.start));
+  const safeEnd = Math.max(0, Math.min(model.getValueLength(), selection.end));
+  const startPosition = model.getPositionAt(safeStart);
+  const endPosition = model.getPositionAt(safeEnd);
+
+  return new monaco.Selection(
+    startPosition.lineNumber,
+    startPosition.column,
+    endPosition.lineNumber,
+    endPosition.column,
+  );
+}
+
+function applyRenderedMarkdownTextToSource(markdown: string): void {
+  if (markdown === getCurrentContent()) {
+    return;
+  }
+
+  const model = editor.getModel();
+  if (!model) {
+    return;
+  }
+
+  const fullRange = model.getFullModelRange();
+  editor.pushUndoStop();
+  editor.executeEdits('markdown-rendered-sync', [{ range: fullRange, text: markdown, forceMoveMarkers: true }]);
+  editor.pushUndoStop();
+}
+
+function applyRenderedMarkdownViewState(): void {
+  editor.updateOptions({ readOnly: isPreviewVisible });
+
+  if (isPreviewVisible) {
+    captureSourceSelectionBeforeRenderedToggle();
+    editorEl.style.display = 'none';
+    splitterEl.style.display = 'none';
+    previewEl.style.display = 'block';
+    previewEl.style.width = '100%';
+    previewScrollbarEl.style.display = 'none';
+    previewScrollbarEl.dataset.active = 'false';
+    if (isMarkdownDocument) {
+      const markdown = getCurrentContent();
+      const canEdit = canUseEditableMarkdown(markdown);
+      previewEl.dataset.markdownEditMode = canEdit ? 'editable' : 'readonly-large';
+      setEditableMarkdownEnabled(canEdit);
+
+      if (canEdit) {
+        setEditableMarkdownContent(markdown);
+        const editableSelection = monacoSelectionToEditableSelection(sourceSelectionBeforeRenderedToggle);
+        if (editableSelection) {
+          setEditableMarkdownSelection(editableSelection);
+        }
+      } else {
+        updatePreviewPane(previewEl, markdown);
+      }
+    } else {
+      previewEl.dataset.markdownEditMode = 'readonly';
+      setEditableMarkdownEnabled(false);
+      updatePreviewPane(previewEl, getCurrentContent());
+    }
+    updatePreviewScrollbar();
+    return;
+  }
+
+  if (isMarkdownDocument) {
+    const renderedSelection = getEditableMarkdownSelection();
+    const monacoSelection = editableSelectionToMonacoSelection(renderedSelection);
+    if (monacoSelection) {
+      sourceSelectionBeforeRenderedToggle = monacoSelection;
+    }
+  }
+
+  setEditableMarkdownEnabled(false);
+  previewEl.dataset.markdownEditMode = 'readonly';
+  previewEl.style.display = 'none';
+  previewEl.style.width = '50%';
+  previewScrollbarEl.style.display = 'none';
+  previewScrollbarEl.dataset.active = 'false';
+  splitterEl.style.display = 'none';
+  editorEl.style.display = 'block';
+  restoreSourceSelectionAfterRenderedToggle();
+  editor.focus();
+}
 
 function setMinimapOpacity(opacity: number): void {
   const clamped = Math.max(0, Math.min(1, opacity));
@@ -194,8 +501,15 @@ editor.onDidChangeModelContent(() => {
   const isDirty  = content !== savedContent;
   bridge.post({ type: 'file:modified', isDirty });
 
-  if (isPreviewVisible) {
+  if (isPreviewVisible && isMarkdownDocument && previewEl.dataset.markdownEditMode === 'editable' && !canUseEditableMarkdown(content)) {
+    setEditableMarkdownEnabled(false);
+    previewEl.dataset.markdownEditMode = 'readonly-large';
     updatePreviewPane(previewEl, content);
+  }
+
+  if (isPreviewVisible && !isEditableRenderedModeActive()) {
+    updatePreviewPane(previewEl, content);
+    updatePreviewScrollbar();
   }
 });
 
@@ -245,8 +559,21 @@ bridge.on(msg => {
       // Set savedContent before setContent to avoid transient dirty events
       // fired by Monaco while swapping models/content.
       savedContent = msg.content;
+      isMarkdownDocument = msg.language.toLowerCase() === 'markdown';
+      sourceSelectionBeforeRenderedToggle = null;
       setContent(msg.content, msg.language);
-      if (isPreviewVisible) updatePreviewPane(previewEl, msg.content);
+      if (isPreviewVisible) {
+        if (isEditableRenderedModeActive()) {
+          setEditableMarkdownContent(msg.content);
+        } else {
+          previewEl.dataset.markdownEditMode = isMarkdownDocument && !canUseEditableMarkdown(msg.content)
+            ? 'readonly-large'
+            : 'readonly';
+          updatePreviewPane(previewEl, msg.content);
+          updatePreviewScrollbar();
+          schedulePreviewScrollbarFade();
+        }
+      }
       break;
 
     case 'file:saved':
@@ -286,12 +613,15 @@ bridge.on(msg => {
       editor.getAction(msg.command as string)?.run();
       break;
 
+    case 'markdown:command':
+      if (isEditableRenderedModeActive()) {
+        applyEditableMarkdownCommand(msg.command, msg.args);
+      }
+      break;
+
     case 'preview:toggle':
       isPreviewVisible = msg.visible;
-      containerEl.classList.toggle('preview-visible', msg.visible);
-      if (msg.visible) {
-        updatePreviewPane(previewEl, getCurrentContent());
-      }
+      applyRenderedMarkdownViewState();
       break;
 
     case 'view:show':
@@ -302,7 +632,7 @@ bridge.on(msg => {
       } else {
         welcomeEl.style.display   = 'none';
         containerEl.style.display = 'flex';
-        editor.focus();
+        applyRenderedMarkdownViewState();
       }
       break;
   }

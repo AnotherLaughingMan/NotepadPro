@@ -2,18 +2,53 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "build",
-			"type": "shell",
+			"label": "Build Debug + Release",
+			"dependsOn": [
+				"Build Debug",
+				"Build Release"
+			],
+			"dependsOrder": "sequence",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Build Debug",
 			"command": "dotnet",
+			"type": "process",
 			"args": [
 				"build",
-				"Notepad Pro.sln"
+				"${workspaceFolder}/Notepad Pro.sln",
+				"-c",
+				"Debug"
 			],
-			"isBackground": false,
-			"problemMatcher": [
-				"$msCompile"
-			],
+			"problemMatcher": "$msCompile",
 			"group": "build"
+		},
+		{
+			"label": "Build Release",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"build",
+				"${workspaceFolder}/Notepad Pro.sln",
+				"-c",
+				"Release"
+			],
+			"problemMatcher": "$msCompile",
+			"group": "build"
+		},
+		{
+			"label": "Clean",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"clean",
+				"${workspaceFolder}/Notepad Pro.sln"
+			],
+			"problemMatcher": "$msCompile"
 		}
 	]
 }

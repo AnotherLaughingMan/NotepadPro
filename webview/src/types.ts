@@ -8,6 +8,7 @@ export type InboundMessage =
   | { type: 'editor:navigate';  line: number; column?: number }
   | { type: 'editor:bookmarks'; bookmarks: BookmarkMarker[] }
   | { type: 'editor:command';   command: string; args?: unknown }
+  | { type: 'markdown:command'; command: string; args?: unknown }
   | { type: 'editor:scrollbarOpacity'; opacity: number }
   | { type: 'preview:toggle';   visible: boolean }
   | { type: 'view:show';        view: 'welcome' | 'editor'; data?: WelcomeData };
@@ -19,6 +20,7 @@ export type OutboundMessage =
   | { type: 'file:modified';       isDirty: boolean }
   | { type: 'cursor:changed';      line: number; column: number; selectionLength: number }
   | { type: 'file:save:request';   content: string }
+  | { type: 'markdown:content:update'; content: string; sourceMode: 'rendered' }
   | { type: 'status:update';       wordCount: number; language: string; lineCount: number }
   | { type: 'welcome:new-file' }
   | { type: 'welcome:open-file' }

@@ -14,6 +14,7 @@ public sealed class EditorViewModel : ViewModelBase
 {
     private const int LineNumberStringLimit = 2000;
     private const int SyncWordCountLimit = 50_000;
+    private const int MarkdownPreviewRenderLimit = 100_000;
     private readonly SettingsViewModel _settings;
     private string _text = string.Empty;
     private string _lineNumbersText = "1";
@@ -117,6 +118,21 @@ public sealed class EditorViewModel : ViewModelBase
 
     public bool IsMarkdown => string.Equals(Language, "Markdown", StringComparison.OrdinalIgnoreCase);
 
+    public bool IsMarkdownFile
+    {
+        get
+        {
+            var extension = Path.GetExtension(FilePath ?? string.Empty);
+
+            return string.Equals(extension, ".md", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".markdown", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mdown", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mkd", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    public bool CanToggleRenderedMarkdownView => IsMarkdown && IsMarkdownFile;
+
     public bool IsMarkdownPreviewActive => IsMarkdown && IsMarkdownPreviewVisible;
 
     public string MarkdownPreviewText
@@ -190,8 +206,11 @@ public sealed class EditorViewModel : ViewModelBase
 
         FilePath = null;
         Language = displayLanguage;
+        IsMarkdownPreviewVisible = false;
         UpdateMarkdownPreviewText();
         this.RaisePropertyChanged(nameof(IsMarkdown));
+        this.RaisePropertyChanged(nameof(IsMarkdownFile));
+        this.RaisePropertyChanged(nameof(CanToggleRenderedMarkdownView));
         this.RaisePropertyChanged(nameof(IsMarkdownPreviewActive));
         HasUnsavedChanges = markDirty;
     }
@@ -506,16 +525,28 @@ public sealed class EditorViewModel : ViewModelBase
             path,
             Text,
             _settings.DetectJsonFromContent);
+
+        if (!CanToggleRenderedMarkdownView && IsMarkdownPreviewVisible)
+        {
+            IsMarkdownPreviewVisible = false;
+        }
+
         UpdateMarkdownPreviewText();
         this.RaisePropertyChanged(nameof(IsMarkdown));
+        this.RaisePropertyChanged(nameof(IsMarkdownFile));
+        this.RaisePropertyChanged(nameof(CanToggleRenderedMarkdownView));
         this.RaisePropertyChanged(nameof(IsMarkdownPreviewActive));
     }
 
     private void UpdateMarkdownPreviewText()
     {
-        MarkdownPreviewText = IsMarkdown
-            ? RenderMarkdownPreviewText(_text)
-            : string.Empty;
+        if (!IsMarkdown || _text.Length > MarkdownPreviewRenderLimit)
+        {
+            MarkdownPreviewText = string.Empty;
+            return;
+        }
+
+        MarkdownPreviewText = RenderMarkdownPreviewText(_text);
     }
 
     private static string RenderMarkdownPreviewText(string markdown)

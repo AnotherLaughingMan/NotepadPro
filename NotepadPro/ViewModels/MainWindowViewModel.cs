@@ -146,10 +146,26 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             .Subscribe(_ =>
             {
                 this.RaisePropertyChanged(nameof(IsActiveEditorMarkdown));
+                this.RaisePropertyChanged(nameof(IsRenderedViewToggleAvailable));
                 this.RaisePropertyChanged(nameof(IsMarkdownPreviewVisible));
+                this.RaisePropertyChanged(nameof(MarkdownRenderedToggleIconText));
+                this.RaisePropertyChanged(nameof(IsMarkdownViewModeIndicatorVisible));
+                this.RaisePropertyChanged(nameof(MarkdownViewModeIndicatorText));
                 this.RaisePropertyChanged(nameof(IsMarkdownToolbarPinAvailable));
                 this.RaisePropertyChanged(nameof(IsMarkdownToolbarShown));
                 this.RaisePropertyChanged(nameof(IsMarkdownToolbarPinnedShown));
+            });
+
+        activeEditor
+            .Select(editor => editor.WhenAnyValue(x => x.FilePath))
+            .Switch()
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ =>
+            {
+                this.RaisePropertyChanged(nameof(IsRenderedViewToggleAvailable));
+                this.RaisePropertyChanged(nameof(MarkdownRenderedToggleIconText));
+                this.RaisePropertyChanged(nameof(IsMarkdownViewModeIndicatorVisible));
+                this.RaisePropertyChanged(nameof(MarkdownViewModeIndicatorText));
             });
 
         activeEditor
@@ -242,6 +258,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(MinimapWidth));
             this.RaisePropertyChanged(nameof(IsGreetingVisible));
             this.RaisePropertyChanged(nameof(WindowTitle));
+            this.RaisePropertyChanged(nameof(IsRenderedViewToggleAvailable));
+            this.RaisePropertyChanged(nameof(MarkdownRenderedToggleIconText));
+            this.RaisePropertyChanged(nameof(IsMarkdownViewModeIndicatorVisible));
+            this.RaisePropertyChanged(nameof(MarkdownViewModeIndicatorText));
             Search.SetEditor(Editor);
             BookmarksPanel?.RefreshView();
         }
@@ -306,18 +326,33 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public bool IsActiveEditorMarkdown => Editor.IsMarkdown;
 
+    public bool IsRenderedViewToggleAvailable => Editor.CanToggleRenderedMarkdownView;
+
     public bool IsMarkdownPreviewVisible
     {
         get => Editor.IsMarkdownPreviewVisible;
         set
         {
+            if (value && !IsRenderedViewToggleAvailable)
+            {
+                return;
+            }
+
             if (!Editor.IsMarkdownPreviewVisible.Equals(value))
             {
                 Editor.IsMarkdownPreviewVisible = value;
                 this.RaisePropertyChanged(nameof(IsMarkdownPreviewVisible));
+                this.RaisePropertyChanged(nameof(MarkdownRenderedToggleIconText));
+                this.RaisePropertyChanged(nameof(MarkdownViewModeIndicatorText));
             }
         }
     }
+
+    public string MarkdownRenderedToggleIconText => IsMarkdownPreviewVisible ? "Aa" : "{}";
+
+    public bool IsMarkdownViewModeIndicatorVisible => IsRenderedViewToggleAvailable;
+
+    public string MarkdownViewModeIndicatorText => IsMarkdownPreviewVisible ? "Rendered" : "Source";
 
     public bool IsZoomFlyoutOpen
     {
@@ -565,7 +600,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public void ToggleMarkdownPreview()
     {
-        if (!IsActiveEditorMarkdown)
+        if (!IsRenderedViewToggleAvailable)
         {
             return;
         }
@@ -638,6 +673,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public async Task OpenFileFromPathAsync(string path)
     {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            RemoveRecentFile(path);
+            RemoveRecentEditorByPath(path);
+            return;
+        }
+
         var existing = Tabs.FirstOrDefault(t =>
             !t.IsWelcomeTab &&
             string.Equals(t.Editor.FilePath, path, StringComparison.OrdinalIgnoreCase));
@@ -1027,6 +1069,28 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     public void ClearRecentFiles()
     {
         RecentFiles.Clear();
+    }
+
+    public bool RemoveRecentFile(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return false;
+        }
+
+        var removed = false;
+        for (var i = RecentFiles.Count - 1; i >= 0; i--)
+        {
+            if (!string.Equals(RecentFiles[i].Path, path, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            RecentFiles.RemoveAt(i);
+            removed = true;
+        }
+
+        return removed;
     }
 
     public void SetRecentFiles(IEnumerable<string> paths)
@@ -1712,6 +1776,22 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Explorer.RecentEditors.Clear();
     }
 
+    public bool RemoveRecentEditor(RecentEditorItem? item)
+    {
+        if (item == null)
+        {
+            return false;
+        }
+
+        var removed = RemoveRecentEditorByPath(item.Path);
+        if (removed)
+        {
+            RemoveRecentFile(item.Path);
+        }
+
+        return removed;
+    }
+
     public void SetRecentEditors(IEnumerable<RecentEditorData> items)
     {
         Explorer.RecentEditors.Clear();
@@ -1860,6 +1940,28 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             Explorer.RecentEditors.RemoveAt(Explorer.RecentEditors.Count - 1);
         }
+    }
+
+    private bool RemoveRecentEditorByPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return false;
+        }
+
+        var removed = false;
+        for (var i = Explorer.RecentEditors.Count - 1; i >= 0; i--)
+        {
+            if (!string.Equals(Explorer.RecentEditors[i].Path, path, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            Explorer.RecentEditors.RemoveAt(i);
+            removed = true;
+        }
+
+        return removed;
     }
 
     private string GetNextUntitledName()

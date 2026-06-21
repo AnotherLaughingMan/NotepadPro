@@ -70,8 +70,10 @@
         <Style Selector="CheckBox">
             <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimary}" />
         </Style>
-        <!-- Semi-transparent scrollbars -->
+        <!-- Theme-matched scrollbars -->
         <Style Selector="ScrollBar">
+            <Setter Property="Background" Value="{DynamicResource ScrollbarTrack}" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundMuted}" />
             <Setter Property="Opacity" Value="{DynamicResource ScrollbarOpacityValue}" />
         </Style>
     </Application.Styles>

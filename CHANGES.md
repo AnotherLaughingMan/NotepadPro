@@ -5,6 +5,15 @@ For the full technical changelog, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Unreleased
+
+### Improvements
+
+- Rendered Markdown editing now better preserves cursor and selection when switching between Source and Rendered modes.
+- Very large Markdown files now automatically use read-only Rendered view to keep editor performance responsive.
+- Read-only Rendered mode now shows an in-view notice when a Markdown file is too large for seamless direct editing.
+- Large Markdown files now skip eager preview-text rendering in the editor model, which reduces Debug startup and edit-time overhead.
+
 ## Version 1.2.0 — April 8, 2026
 
 ### New Features

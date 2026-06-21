@@ -216,6 +216,11 @@
                         <DataTemplate>
                             <Button Classes="OpenEditorItem" Tag="{Binding}" Click="OnOpenRecentEditorClick">
                                 <TextBlock Text="{Binding Title}" FontSize="12" Foreground="{DynamicResource ForegroundPrimary}" TextTrimming="CharacterEllipsis" />
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Remove" Tag="{Binding}" Click="OnRemoveRecentEditor" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
                             </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

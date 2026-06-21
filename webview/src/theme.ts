@@ -4,6 +4,7 @@ import type { ThemeColors } from './types';
 export function applyTheme(name: string, colors: ThemeColors): void {
   const base: monaco.editor.BuiltinTheme =
     name.toLowerCase().includes('light') ? 'vs' : 'vs-dark';
+  const colorScheme = base === 'vs' ? 'light' : 'dark';
 
   monaco.editor.defineTheme('notepadpro-theme', {
     base,
@@ -39,6 +40,10 @@ export function applyTheme(name: string, colors: ThemeColors): void {
       'editorIndentGuide.activeBackground1': colors.foreground + '50',
       'editorBracketMatch.background':       colors.selectionBackground + '60',
       'editorBracketMatch.border':           colors.syntaxKeyword + '80',
+      'editor.scrollbarSlider.background':   colors.foreground + '33',
+      'editor.scrollbarSlider.hoverBackground': colors.foreground + '55',
+      'editor.scrollbarSlider.activeBackground': colors.foreground + '77',
+      'scrollbar.shadow':                    colors.background,
     },
   });
 
@@ -48,7 +53,13 @@ export function applyTheme(name: string, colors: ThemeColors): void {
   document.documentElement.style.setProperty('--editor-bg',    colors.background);
   document.documentElement.style.setProperty('--editor-fg',    colors.foreground);
   document.documentElement.style.setProperty('--border-color', colors.foreground + '30');
+  document.documentElement.style.setProperty('--page-color-scheme', colorScheme);
+  document.documentElement.style.setProperty('--preview-color-scheme', colorScheme);
+  document.documentElement.style.setProperty('--preview-scrollbar-track', colors.background + '2E');
+  document.documentElement.style.setProperty('--preview-scrollbar-thumb', colors.foreground + '66');
+  document.documentElement.style.setProperty('--preview-scrollbar-thumb-hover', colors.foreground + '99');
   document.body.style.background = colors.background;
+  document.documentElement.style.colorScheme = colorScheme;
 }
 
 /** Strips leading '#' from a hex color string. Monaco token rules require bare hex. */

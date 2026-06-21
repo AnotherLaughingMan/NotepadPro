@@ -334,7 +334,7 @@
                                       InputGesture="Ctrl+Shift+B"
                                       Click="OnViewToggleBookmarks" />
                             <Separator />
-                <MenuItem Header="Appearance">
+                            <MenuItem Header="Appearance">
                                 <MenuItem Header="Status Bar"
                                           ToggleType="CheckBox"
                                           IsChecked="{Binding Settings.IsStatusBarVisible, Mode=TwoWay}" />
@@ -386,10 +386,12 @@
                                 </MenuItem>
                             </MenuItem>
                             <Separator />
-                            <MenuItem Header="Markdown Preview"
+                            <MenuItem Header="Toggle Rendered View"
                                       ToggleType="CheckBox"
                                       IsChecked="{Binding IsMarkdownPreviewVisible, Mode=TwoWay}"
-                                      IsEnabled="{Binding IsActiveEditorMarkdown}" />
+                                      InputGesture="Ctrl+Shift+M"
+                                      IsVisible="{Binding IsRenderedViewToggleAvailable}"
+                                      IsEnabled="{Binding IsRenderedViewToggleAvailable}" />
                             <MenuItem Header="Markdown Toolbar"
                                       ToggleType="CheckBox"
                                       IsChecked="{Binding IsMarkdownToolbarVisible, Mode=TwoWay}"
@@ -431,8 +433,8 @@
                                 Margin="0"
                                 Panel.ZIndex="2"
                                 IsVisible="{Binding IsMarkdownToolbarPinnedShown}">
-                        <Button x:Name="PinnedMdTogglePreviewButton" Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Preview">
-                            <TextBlock Text="&#xE8A1;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                        <Button x:Name="PinnedMdTogglePreviewButton" Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Rendered View" IsVisible="{Binding IsRenderedViewToggleAvailable}" IsEnabled="{Binding IsRenderedViewToggleAvailable}">
+                            <TextBlock Text="{Binding MarkdownRenderedToggleIconText}" FontFamily="Consolas" FontSize="12" FontWeight="SemiBold" />
                         </Button>
                         <Button x:Name="PinnedMdHeadingButton" Classes="MarkdownToolbarButton" Click="OnMarkdownHeading" ToolTip.Tip="Heading (Shift: Decrease)">
                             <TextBlock Text="H1" FontWeight="Bold" FontSize="11" />
@@ -476,8 +478,8 @@
                                             BorderBrush="{DynamicResource BorderMedium}"
                                             Background="{DynamicResource PanelBackground}">
                                         <StackPanel Orientation="Horizontal" Spacing="2">
-                                            <Button x:Name="PinnedMdOverflowTogglePreview" Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Preview">
-                                                <TextBlock Text="&#xE8A1;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                                            <Button x:Name="PinnedMdOverflowTogglePreview" Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Rendered View" IsVisible="{Binding IsRenderedViewToggleAvailable}" IsEnabled="{Binding IsRenderedViewToggleAvailable}">
+                                                <TextBlock Text="{Binding MarkdownRenderedToggleIconText}" FontFamily="Consolas" FontSize="12" FontWeight="SemiBold" />
                                             </Button>
                                             <Button x:Name="PinnedMdOverflowHeading" Classes="MarkdownToolbarButton" Click="OnMarkdownHeading" ToolTip.Tip="Heading (Shift: Decrease)">
                                                 <TextBlock Text="H1" FontWeight="Bold" FontSize="11" />
@@ -772,13 +774,13 @@
                                                TextWrapping="NoWrap"
                                                VerticalAlignment="Center"
                                                Margin="0,0,2,0" />
-                                            <TextBlock Grid.Column="2"
-                                                   Classes="TabPinIcon"
-                                                   Text="&#xE718;"
-                                                   FontFamily="Segoe Fluent Icons"
-                                                   ToolTip.Tip="Pinned tab"
-                                                   IsVisible="{Binding IsPinnedIndicatorVisible}" />
-                                            <Border Grid.Column="3"
+                                    <TextBlock Grid.Column="2"
+                                               Classes="TabPinIcon"
+                                               Text="&#xE718;"
+                                               FontFamily="Segoe Fluent Icons"
+                                               ToolTip.Tip="Pinned tab"
+                                               IsVisible="{Binding IsPinnedIndicatorVisible}" />
+                                    <Border Grid.Column="3"
                                             Width="7"
                                             Height="7"
                                             CornerRadius="3.5"
@@ -787,7 +789,7 @@
                                             BorderThickness="1"
                                             VerticalAlignment="Center"
                                             IsVisible="{Binding IsDirty}" />
-                                            <Button Grid.Column="4"
+                                    <Button Grid.Column="4"
                                             Classes="TabClose"
                                             ToolTip.Tip="Close"
                                             IsVisible="{Binding IsCloseButtonVisible}"
@@ -966,7 +968,7 @@
                     </TabControl>
 
                     <!-- WebView2 host: Monaco editor (TypeScript/HTML/CSS).
-                         Offset by 30 px (tab strip height) so the tab bar remains visible. -->
+                    Offset by 30 px (tab strip height) so the tab bar remains visible. -->
                     <views:WebViewHost x:Name="EditorWebView" IsVisible="True" Margin="0,30,0,0" />
                 </Grid>
             </Border>
@@ -1027,17 +1029,17 @@
             </Border>
 
             <!-- Custom scrollbar hidden: Monaco's built-in scrollbar replaces it -->
-                <Border Grid.Column="6"
+            <Border Grid.Column="6"
                     Background="{DynamicResource ScrollbarTrack}"
                     IsVisible="False"
                     ClipToBounds="True">
                 <Canvas x:Name="ScrollbarCanvas" Background="Transparent">
-                        <Border x:Name="ScrollbarThumb"
-                            Background="#50808080"
+                    <Border x:Name="ScrollbarThumb"
+                            Background="{DynamicResource ForegroundMuted}"
                             CornerRadius="0"
                             IsHitTestVisible="False"
                             Opacity="{DynamicResource ScrollbarOpacityValue}" />
-                        <Border x:Name="ScrollbarCursorIndicator"
+                    <Border x:Name="ScrollbarCursorIndicator"
                             Height="2"
                             Background="{DynamicResource AccentBrush}"
                             IsHitTestVisible="False"
@@ -1060,13 +1062,15 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="{Binding Settings.Encoding}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" />
                 <TextBlock Grid.Column="1" Text="{Binding Settings.Indentation}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
                 <TextBlock Grid.Column="2" Text="{Binding Settings.Eol}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
                 <TextBlock Grid.Column="3" Text="{Binding Settings.FileType}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
-                <TextBlock Grid.Column="4" Text="{Binding Editor.WordCount, StringFormat=Words: {0}}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
-                <TextBlock Grid.Column="5" Text="{Binding LineColumnText}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
+                <TextBlock Grid.Column="4" Text="{Binding MarkdownViewModeIndicatorText}" IsVisible="{Binding IsMarkdownViewModeIndicatorVisible}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
+                <TextBlock Grid.Column="5" Text="{Binding Editor.WordCount, StringFormat=Words: {0}}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
+                <TextBlock Grid.Column="6" Text="{Binding LineColumnText}" Foreground="{DynamicResource StatusBarForeground}" FontSize="{Binding Settings.StatusBarFontSize}" Margin="12,0,0,0" />
             </Grid>
         </Border>
 
@@ -1102,18 +1106,18 @@
         </Border>
 
         <Border x:Name="MarkdownToolbarAnchor"
-            Grid.ColumnSpan="3"
-            Grid.RowSpan="3"
-            Width="0"
-            Height="0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            IsHitTestVisible="False" />
+                Grid.ColumnSpan="3"
+                Grid.RowSpan="3"
+                Width="0"
+                Height="0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                IsHitTestVisible="False" />
 
         <Popup x:Name="MarkdownToolbarPopup"
                IsOpen="{Binding IsMarkdownToolbarShown}"
                PlacementTarget="{Binding #MarkdownToolbarAnchor}"
-             Placement="BottomEdgeAlignedLeft"
+               Placement="BottomEdgeAlignedLeft"
                HorizontalOffset="{Binding MarkdownToolbarX}"
                VerticalOffset="{Binding MarkdownToolbarY}"
                IsLightDismissEnabled="False"
@@ -1138,8 +1142,8 @@
                                    VerticalAlignment="Center" />
                     </Border>
 
-                    <Button Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Preview">
-                        <TextBlock Text="&#xE8A1;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                    <Button Classes="MarkdownToolbarButton" Classes.Active="{Binding IsMarkdownPreviewVisible}" Click="OnMarkdownTogglePreview" ToolTip.Tip="Toggle Rendered View" IsVisible="{Binding IsRenderedViewToggleAvailable}" IsEnabled="{Binding IsRenderedViewToggleAvailable}">
+                        <TextBlock Text="{Binding MarkdownRenderedToggleIconText}" FontFamily="Consolas" FontSize="12" FontWeight="SemiBold" />
                     </Button>
                     <Button Classes="MarkdownToolbarButton" Click="OnMarkdownHeading" ToolTip.Tip="Heading (Shift: Decrease)">
                         <TextBlock Text="H1" FontWeight="Bold" FontSize="11" />

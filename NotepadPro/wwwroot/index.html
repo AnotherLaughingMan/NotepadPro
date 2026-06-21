@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <meta name="color-scheme" content="dark light" />
     <meta http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; worker-src blob:;" />
     <title>Notepad Pro Editor</title>
@@ -15,7 +16,12 @@
         overflow: hidden;
         background: var(--editor-bg, #1e1e1e);
         color: var(--editor-fg, #d4d4d4);
+         color-scheme: var(--page-color-scheme, dark);
       }
+
+       :root {
+         color-scheme: dark light;
+       }
 
       #editor-container {
         display: flex;
@@ -74,6 +80,97 @@
         color: var(--editor-fg, #d4d4d4);
         display: none;
         flex-shrink: 0;
+        color-scheme: var(--preview-color-scheme, dark);
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      #preview-pane::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+      }
+
+      #preview-scrollbar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 8px;
+        display: none;
+        z-index: 5;
+        pointer-events: auto;
+        opacity: 0;
+        transition: opacity 260ms ease;
+      }
+
+      #preview-scrollbar[data-active='true'] {
+        opacity: 1;
+      }
+
+      #preview-scrollbar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        background: transparent;
+      }
+
+      #preview-scrollbar-thumb {
+        position: absolute;
+        top: 0;
+        right: 1px;
+        width: 6px;
+        min-height: 24px;
+        border-radius: 999px;
+        background: var(--preview-scrollbar-thumb, rgba(212, 212, 212, 0.18));
+        border: none;
+        box-shadow: none;
+        transform: translateY(0);
+      }
+
+      #preview-scrollbar:hover #preview-scrollbar-thumb,
+      #preview-scrollbar[data-dragging='true'] #preview-scrollbar-thumb {
+        background: var(--preview-scrollbar-thumb-hover, rgba(212, 212, 212, 0.5));
+      }
+      #preview-pane::-webkit-scrollbar,
+      #preview-pane pre::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+        background-color: var(--preview-scrollbar-track, rgba(0, 0, 0, 0.18));
+      }
+
+      #preview-pane::-webkit-scrollbar-track,
+      #preview-pane pre::-webkit-scrollbar-track {
+        background-color: var(--preview-scrollbar-track, rgba(0, 0, 0, 0.18));
+      }
+
+      #preview-pane::-webkit-scrollbar-thumb,
+      #preview-pane pre::-webkit-scrollbar-thumb {
+        -webkit-appearance: none;
+        background-color: var(--preview-scrollbar-thumb, rgba(212, 212, 212, 0.45));
+        border: 2px solid var(--preview-scrollbar-track, rgba(0, 0, 0, 0.18));
+        border-radius: 999px;
+      }
+
+      #preview-pane::-webkit-scrollbar-thumb:hover,
+      #preview-pane pre::-webkit-scrollbar-thumb:hover {
+        background-color: var(--preview-scrollbar-thumb-hover, rgba(212, 212, 212, 0.65));
+      }
+
+      #preview-pane[data-markdown-edit-mode='readonly-large']::before {
+        content: 'Rendered view is read-only for large Markdown files. Switch to Source view to edit.';
+        display: block;
+        margin: 0 0 14px 0;
+        padding: 8px 10px;
+        font-size: 12px;
+        line-height: 1.4;
+        border: 1px solid rgba(242, 193, 78, 0.55);
+        background: rgba(242, 193, 78, 0.15);
+        color: var(--editor-fg, #d4d4d4);
+        border-radius: 6px;
       }
 
       #editor-container.preview-visible #preview-splitter,
@@ -138,7 +235,7 @@
       #preview-pane img { max-width: 100%; border-radius: 4px; }
       #preview-pane hr { border: none; border-top: 1px solid var(--border-color, #444); margin: 1.5em 0; }
     </style>
-    <script type="module" crossorigin src="/assets/index-J6sRqyve.js"></script>
+    <script type="module" crossorigin src="/assets/index-8Z475Y6-.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-DIPB3Vbg.css">
   </head>
   <body>
@@ -150,6 +247,9 @@
       <div id="monaco-editor"></div>
       <div id="preview-splitter"></div>
       <div id="preview-pane"></div>
+      <div id="preview-scrollbar" aria-hidden="true">
+        <div id="preview-scrollbar-thumb"></div>
+      </div>
     </div>
   </body>
 </html>

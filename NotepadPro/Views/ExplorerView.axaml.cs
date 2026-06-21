@@ -85,6 +85,16 @@ public partial class ExplorerView : UserControl
         MainViewModel?.ClearRecentEditors();
     }
 
+    private void OnRemoveRecentEditor(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem menuItem || menuItem.Tag is not RecentEditorItem item)
+        {
+            return;
+        }
+
+        MainViewModel?.RemoveRecentEditor(item);
+    }
+
     private async void OnNewFileInRoot(object? sender, RoutedEventArgs e)
     {
         if (ViewModel != null)

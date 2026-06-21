@@ -100,6 +100,7 @@ public partial class MainWindow : Window
     private bool _markdownNumberedToBulletedRequested;
     private bool _markdownBulletedToNumberedRequested;
     private WebBridgeService? _webBridge;
+    private bool _suppressWebViewPushFromBridge;
 
     private enum GotoAnythingQueryMode
     {
@@ -1032,6 +1033,10 @@ public partial class MainWindow : Window
         {
             switch (e.Key)
             {
+                case Key.M:
+                    OnMarkdownTogglePreview(sender, e);
+                    e.Handled = true;
+                    return;
                 case Key.F2:
                     OnEditToggleGlobalBookmark(sender, e);
                     e.Handled = true;
@@ -1253,9 +1258,11 @@ public partial class MainWindow : Window
 
     private async void OnFileOpenFolder(object? sender, RoutedEventArgs e)
     {
+        var suggestedStart = await TryGetPreferredOpenStartLocationAsync();
         var result = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            AllowMultiple = false
+            AllowMultiple = false,
+            SuggestedStartLocation = suggestedStart
         });
 
         var folder = result.FirstOrDefault()?.TryGetLocalPath();
@@ -1267,9 +1274,11 @@ public partial class MainWindow : Window
 
     private async void OnFileOpenWorkspace(object? sender, RoutedEventArgs e)
     {
+        var suggestedStart = await TryGetPreferredOpenStartLocationAsync();
         var result = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             AllowMultiple = false,
+            SuggestedStartLocation = suggestedStart,
             FileTypeFilter = new List<FilePickerFileType>
             {
                 new("VS Code Workspace")
@@ -1299,10 +1308,12 @@ public partial class MainWindow : Window
             return;
         }
 
+        var suggestedStart = await TryGetPreferredOpenStartLocationAsync();
         var folderResult = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             AllowMultiple = false,
-            Title = "Select folder for new workspace"
+            Title = "Select folder for new workspace",
+            SuggestedStartLocation = suggestedStart
         });
 
         var folderPath = folderResult.FirstOrDefault()?.TryGetLocalPath();
@@ -1735,9 +1746,11 @@ public partial class MainWindow : Window
 
     private async Task<IReadOnlyList<string>> PickOpenFileAsync()
     {
+        var suggestedStart = await TryGetPreferredOpenStartLocationAsync();
         var options = new FilePickerOpenOptions
         {
             AllowMultiple = false,
+            SuggestedStartLocation = suggestedStart,
             FileTypeFilter = BuildEditorFileTypeChoices(includeAllFiles: true)
         };
 
@@ -1755,6 +1768,58 @@ public partial class MainWindow : Window
 
         var result = await StorageProvider.SaveFilePickerAsync(options);
         return result?.TryGetLocalPath();
+    }
+
+    private async Task<IStorageFolder?> TryGetPreferredOpenStartLocationAsync()
+    {
+        var provider = StorageProvider;
+        var candidateFolders = GetOpenStartLocationCandidates();
+
+        foreach (var folderPath in candidateFolders)
+        {
+            var folder = await provider.TryGetFolderFromPathAsync(folderPath);
+            if (folder != null)
+            {
+                return folder;
+            }
+        }
+
+        return null;
+    }
+
+    private IEnumerable<string> GetOpenStartLocationCandidates()
+    {
+        var unique = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        void AddFolder(string? path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+            {
+                return;
+            }
+
+            unique.Add(path);
+        }
+
+        var activeFile = ViewModel?.Editor.FilePath;
+        if (!string.IsNullOrWhiteSpace(activeFile))
+        {
+            AddFolder(Path.GetDirectoryName(activeFile));
+        }
+
+        if (ViewModel != null)
+        {
+            foreach (var recent in ViewModel.RecentFiles)
+            {
+                AddFolder(Path.GetDirectoryName(recent.Path));
+            }
+
+            AddFolder(ViewModel.Explorer.CurrentFolderPath);
+            AddFolder(Path.GetDirectoryName(ViewModel.Explorer.CurrentWorkspacePath));
+        }
+
+        AddFolder(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+        return unique;
     }
 
     private static List<FilePickerFileType> BuildEditorFileTypeChoices(bool includeAllFiles)
@@ -2539,11 +2604,21 @@ public partial class MainWindow : Window
 
     private void OnMarkdownBold(object? sender, RoutedEventArgs e)
     {
+        if (TrySendRenderedMarkdownCommand("bold"))
+        {
+            return;
+        }
+
         ApplyMarkdownWrap("**", "**", "bold text");
     }
 
     private void OnMarkdownItalic(object? sender, RoutedEventArgs e)
     {
+        if (TrySendRenderedMarkdownCommand("italic"))
+        {
+            return;
+        }
+
         ApplyMarkdownWrap("*", "*", "italic text");
     }
 
@@ -2551,6 +2626,12 @@ public partial class MainWindow : Window
     {
         var decrement = _markdownHeadingDecrementRequested;
         _markdownHeadingDecrementRequested = false;
+
+        if (TrySendRenderedMarkdownCommand("heading", new { decrement }))
+        {
+            return;
+        }
+
         ApplyMarkdownHeadingCycle(decrement);
     }
 
@@ -2640,11 +2721,22 @@ public partial class MainWindow : Window
 
     private void OnMarkdownInlineCode(object? sender, RoutedEventArgs e)
     {
+        if (TrySendRenderedMarkdownCommand("inline-code"))
+        {
+            return;
+        }
+
         ApplyMarkdownWrap("`", "`", "code");
     }
 
     private void OnMarkdownBulletedList(object? sender, RoutedEventArgs e)
     {
+        if (TrySendRenderedMarkdownCommand("bulleted-list", new { convertToNumbered = _markdownBulletedToNumberedRequested }))
+        {
+            _markdownBulletedToNumberedRequested = false;
+            return;
+        }
+
         if (_markdownBulletedToNumberedRequested)
         {
             _markdownBulletedToNumberedRequested = false;
@@ -2659,12 +2751,39 @@ public partial class MainWindow : Window
     {
         var convertToBullets = _markdownNumberedToBulletedRequested;
         _markdownNumberedToBulletedRequested = false;
+
+        if (TrySendRenderedMarkdownCommand("numbered-list", new { convertToBullets }))
+        {
+            return;
+        }
+
         ApplyMarkdownNumberedList(convertToBullets);
     }
 
     private void OnMarkdownLink(object? sender, RoutedEventArgs e)
     {
+        if (TrySendRenderedMarkdownCommand("link"))
+        {
+            return;
+        }
+
         ApplyMarkdownLink();
+    }
+
+    private bool TrySendRenderedMarkdownCommand(string command, object? args = null)
+    {
+        if (_webBridge is null || ViewModel is null)
+        {
+            return false;
+        }
+
+        if (!ViewModel.IsRenderedViewToggleAvailable || !ViewModel.IsMarkdownPreviewVisible)
+        {
+            return false;
+        }
+
+        _webBridge.SendMarkdownCommand(command, args);
+        return true;
     }
 
     private void OnBeginPrint(object? sender, PrintEventArgs e)
@@ -3605,6 +3724,7 @@ public partial class MainWindow : Window
     private void OnEditorContentChangedForBridge(object? sender, PropertyChangedEventArgs e)
     {
         if (ViewModel?.IsWelcomeTabSelected == true) return;
+        if (_suppressWebViewPushFromBridge) return;
 
         if (e.PropertyName is nameof(EditorViewModel.Text) or nameof(EditorViewModel.Language))
         {
@@ -3613,7 +3733,7 @@ public partial class MainWindow : Window
         else if (e.PropertyName == nameof(EditorViewModel.IsMarkdownPreviewVisible)
                  && _activeEditorModel is { } editor)
         {
-            _webBridge?.SendPreviewToggle(editor.IsMarkdownPreviewVisible);
+            _webBridge?.SendPreviewToggle(editor.CanToggleRenderedMarkdownView && editor.IsMarkdownPreviewVisible);
         }
     }
 
@@ -3632,6 +3752,7 @@ public partial class MainWindow : Window
         var lang = editor.Language ?? "plaintext";
         _webBridge.SendViewEditor();
         _webBridge.SendFileOpen(path, editor.Text, lang);
+        _webBridge.SendPreviewToggle(editor.CanToggleRenderedMarkdownView && editor.IsMarkdownPreviewVisible);
         RefreshActiveEditorBookmarks();
     }
 
@@ -3677,6 +3798,37 @@ public partial class MainWindow : Window
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
                 ViewModel?.Editor.SetExternalDirtyState(isDirty);
+            });
+        };
+
+        _webBridge.MarkdownContentUpdated += (_, args) =>
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                if (ViewModel?.Editor is not { } editor)
+                {
+                    return;
+                }
+
+                if (!editor.CanToggleRenderedMarkdownView || !editor.IsMarkdownPreviewVisible)
+                {
+                    return;
+                }
+
+                if (string.Equals(editor.Text, args.Content, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _suppressWebViewPushFromBridge = true;
+                try
+                {
+                    editor.Text = args.Content;
+                }
+                finally
+                {
+                    _suppressWebViewPushFromBridge = false;
+                }
             });
         };
 
@@ -4077,7 +4229,7 @@ public partial class MainWindow : Window
             CreateSettingToggleEntry("Edit: Toggle Auto Indent", "auto indent indentation enter", () => ViewModel.Settings.AutoIndentation, value => ViewModel.Settings.AutoIndentation = value),
             CreateSettingToggleEntry("Edit: Toggle Auto Close Brackets", "auto close brackets braces quotes", () => ViewModel.Settings.AutoBracketing, value => ViewModel.Settings.AutoBracketing = value),
             CreateSettingToggleEntry("View: Toggle Activity Bar", "activity bar rail sidebar", () => ViewModel.Settings.IsActivityBarVisible, value => ViewModel.Settings.IsActivityBarVisible = value),
-            CreateSettingToggleEntry("Markdown: Toggle Preview", "markdown preview", () => ViewModel.IsMarkdownPreviewVisible, value => ViewModel.IsMarkdownPreviewVisible = value),
+            CreateSettingToggleEntry("Markdown: Toggle Rendered View", "markdown rendered view", () => ViewModel.IsMarkdownPreviewVisible, value => ViewModel.IsMarkdownPreviewVisible = value),
             CreateSettingToggleEntry("Markdown: Toggle Toolbar", "markdown toolbar", () => ViewModel.IsMarkdownToolbarVisible, value => ViewModel.IsMarkdownToolbarVisible = value),
             CreateSettingToggleEntry("Markdown: Toggle Toolbar Pin", "markdown pin toolbar", () => ViewModel.IsMarkdownToolbarPinned, value => ViewModel.IsMarkdownToolbarPinned = value),
             new QuickPickEntry("Markdown: Recover Toolbar To Title Bar", () => ExecuteQuickActionAsync(() =>
