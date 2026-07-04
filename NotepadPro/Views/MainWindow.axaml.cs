@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Drawing.Printing;
 using Avalonia;
@@ -101,6 +102,7 @@ public partial class MainWindow : Window
     private bool _markdownBulletedToNumberedRequested;
     private WebBridgeService? _webBridge;
     private bool _suppressWebViewPushFromBridge;
+    private TaskCompletionSource<string>? _pendingEditorTextTcs;
 
     private enum GotoAnythingQueryMode
     {
@@ -747,6 +749,10 @@ public partial class MainWindow : Window
 
         if (result == SavePromptResult.Save)
         {
+            // Always fetch latest Monaco text before writing on close/save prompts.
+            var latest = await AwaitLatestEditorTextAsync();
+            tab.Editor.Text = latest;
+
             if (string.IsNullOrWhiteSpace(tab.Editor.FilePath))
             {
                 var path = await PickSaveFileAsync();
@@ -767,6 +773,9 @@ public partial class MainWindow : Window
 
         if (result == SavePromptResult.SaveAs)
         {
+            var latest = await AwaitLatestEditorTextAsync();
+            tab.Editor.Text = latest;
+
             var path = await PickSaveFileAsync();
             if (string.IsNullOrWhiteSpace(path))
             {
@@ -1477,6 +1486,10 @@ public partial class MainWindow : Window
             return;
         }
 
+        // Ensure we have the latest text from Monaco before any host-initiated save.
+        var latest = await AwaitLatestEditorTextAsync();
+        ViewModel.Editor.Text = latest;
+
         if (string.IsNullOrWhiteSpace(ViewModel.Editor.FilePath))
         {
             await SaveAsAsync();
@@ -1734,6 +1747,10 @@ public partial class MainWindow : Window
         {
             return;
         }
+
+        // Pull latest Monaco content first so Save As never writes empty data.
+        var latest = await AwaitLatestEditorTextAsync();
+        ViewModel.Editor.Text = latest;
 
         var path = await PickSaveFileAsync();
         if (string.IsNullOrWhiteSpace(path))
@@ -3329,7 +3346,6 @@ public partial class MainWindow : Window
 
             var replacement = $"[{selected}](https://)";
             var updated = text.Remove(selectionStart, selectionEnd - selectionStart).Insert(selectionStart, replacement);
-
             editor.Text = updated;
             var urlStart = selectionStart + replacement.IndexOf("https://", StringComparison.Ordinal);
             editor.Select(urlStart, "https://".Length);
@@ -3790,6 +3806,12 @@ public partial class MainWindow : Window
             _ = editor.SaveAsync();
         };
 
+        _webBridge.TextResponseReceived += (_, content) =>
+        {
+            _pendingEditorTextTcs?.TrySetResult(content);
+            _pendingEditorTextTcs = null;
+        };
+
         _webBridge.CursorChanged += (_, args) =>
         {
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
@@ -3881,6 +3903,33 @@ public partial class MainWindow : Window
             }
         };
     }
+
+    /// <summary>
+    /// Requests the latest text from the Monaco webview and awaits the response.
+    /// Used by all host-initiated save paths so that Save/Save As never writes stale/empty content.
+    /// </summary>
+    private async Task<string> AwaitLatestEditorTextAsync()
+    {
+        if (_webBridge is null || ViewModel?.IsWelcomeTabSelected == true)
+        {
+            return ViewModel?.Editor.Text ?? string.Empty;
+        }
+
+        // If a previous request is still pending, cancel it.
+        _pendingEditorTextTcs?.TrySetCanceled();
+        _pendingEditorTextTcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        _webBridge.RequestEditorText();
+
+        // Fallback timeout so we never hang forever on a dead webview.
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(800));
+        cts.Token.Register(() => _pendingEditorTextTcs?.TrySetResult(ViewModel?.Editor.Text ?? string.Empty));
+
+        var result = await _pendingEditorTextTcs.Task;
+        return result;
+    }
+
+    // ── End of WebView2 bridge ───────────────────────────────────────────────
 
     private void OnSettingsPropertyChangedForBridge(object? sender, PropertyChangedEventArgs e)
     {
@@ -5302,8 +5351,6 @@ public partial class MainWindow : Window
 
         var deltaY = point.Y - _scrollbarDragStartY;
         var maxOffset = _activeEditorScrollViewer.Extent.Height - _activeEditorScrollViewer.Viewport.Height;
-        if (maxOffset <= 0) return;
-
         var newOffset = _scrollbarDragStartOffset + (deltaY / maxThumbTop) * maxOffset;
         newOffset = Math.Clamp(newOffset, 0, maxOffset);
         _activeEditorScrollViewer.Offset = new Vector(_activeEditorScrollViewer.Offset.X, newOffset);

@@ -635,6 +635,10 @@ bridge.on(msg => {
         applyRenderedMarkdownViewState();
       }
       break;
+
+    case 'editor:request-text':
+      bridge.post({ type: 'editor:text:response', content: getCurrentContent() });
+      break;
   }
 });
 

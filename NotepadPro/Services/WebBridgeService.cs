@@ -50,6 +50,9 @@ public sealed class WebBridgeService
     /// <summary>Raised when editable rendered markdown pushes content back to host.</summary>
     public event EventHandler<MarkdownContentUpdateArgs>? MarkdownContentUpdated;
 
+    /// <summary>Raised when the editor replies to a text request (used for save-before-write sync).</summary>
+    public event EventHandler<string>? TextResponseReceived;
+
     // ── Outbound helpers (C# → webview) ──────────────────────────────────────
 
     public void SendFileOpen(string path, string content, string language) =>
@@ -89,6 +92,10 @@ public sealed class WebBridgeService
     public void SendViewWelcome(WelcomeDataBridge data) =>
         Post(new { type = "view:show", view = "welcome", data });
 
+    /// <summary>Asks Monaco to return its current text (for host-initiated Save/Save As).</summary>
+    public void RequestEditorText() =>
+        Post(new { type = "editor:request-text" });
+
     // ── Internals ────────────────────────────────────────────────────────────
 
     private void Post(object message) =>
@@ -127,6 +134,9 @@ public sealed class WebBridgeService
                 break;
             case "markdown:content:update":
                 MarkdownContentUpdated?.Invoke(this, new MarkdownContentUpdateArgs(msg.Content ?? string.Empty, msg.SourceMode ?? "rendered"));
+                break;
+            case "editor:text:response":
+                TextResponseReceived?.Invoke(this, msg.Content ?? string.Empty);
                 break;
             case "welcome:new-file":
             case "welcome:open-file":

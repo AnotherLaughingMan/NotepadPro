@@ -11,7 +11,8 @@ export type InboundMessage =
   | { type: 'markdown:command'; command: string; args?: unknown }
   | { type: 'editor:scrollbarOpacity'; opacity: number }
   | { type: 'preview:toggle';   visible: boolean }
-  | { type: 'view:show';        view: 'welcome' | 'editor'; data?: WelcomeData };
+  | { type: 'view:show';        view: 'welcome' | 'editor'; data?: WelcomeData }
+  | { type: 'editor:request-text' };
 
 // ── Outbound messages (WebView → C# host) ─────────────────────────────────
 
@@ -27,7 +28,8 @@ export type OutboundMessage =
   | { type: 'welcome:open-folder' }
   | { type: 'welcome:open-workspace' }
   | { type: 'welcome:create-workspace' }
-  | { type: 'welcome:open-recent'; path: string; kind: 'file' | 'folder' | 'workspace' };
+  | { type: 'welcome:open-recent'; path: string; kind: 'file' | 'folder' | 'workspace' }
+  | { type: 'editor:text:response'; content: string };
 
 // ── Shared data shapes ─────────────────────────────────────────────────────
 

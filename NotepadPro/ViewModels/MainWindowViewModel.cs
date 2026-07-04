@@ -1737,12 +1737,20 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public async Task SaveAllAsync()
     {
-        foreach (var tab in Tabs)
+        // Snapshot to guard against collection changes during iteration.
+        var snapshot = Tabs.ToList();
+        foreach (var tab in snapshot)
         {
-            if (tab.Editor.HasUnsavedChanges && !string.IsNullOrWhiteSpace(tab.Editor.FilePath))
+            if (!tab.Editor.HasUnsavedChanges)
+            {
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(tab.Editor.FilePath))
             {
                 await tab.Editor.SaveAsync();
             }
+            // Untitled tabs are left for the user to Save As explicitly.
         }
     }
 
