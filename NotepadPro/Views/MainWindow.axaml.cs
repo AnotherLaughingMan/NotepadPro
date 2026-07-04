@@ -1833,6 +1833,7 @@ public partial class MainWindow : Window
                     "*.txt", "*.text", "*.log",
                     "*.md", "*.markdown", "*.mdown", "*.mkd",
                     "*.json", "*.jsonc", "*.json5", "*.patch", "*.recipe", "*.item", "*.object", "*.frames", "*.config", "*.modinfo",
+                    "*.code-workspace",
                     "*.xml", "*.xsd", "*.xsl", "*.xslt", "*.svg", "*.resx", "*.props", "*.targets", "*.xaml", "*.axaml",
                     "*.cs", "*.csx", "*.cake",
                     "*.c", "*.h", "*.cpp", "*.cc", "*.cxx", "*.c++", "*.hh", "*.hpp", "*.hxx", "*.inl", "*.ipp", "*.tpp",
@@ -1852,6 +1853,10 @@ public partial class MainWindow : Window
             new("JSON")
             {
                 Patterns = new List<string> { "*.json", "*.jsonc", "*.json5" }
+            },
+            new("VS Code Workspace")
+            {
+                Patterns = new List<string> { "*.code-workspace" }
             },
             new("Starbound JSON-Like")
             {

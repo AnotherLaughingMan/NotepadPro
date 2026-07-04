@@ -289,7 +289,7 @@ public sealed class EditorViewModel : ViewModelBase
     {
         FilePath = path;
         UpdateLanguageFromPath(path);
-        EnsureUnfolded();
+        // Do not call EnsureUnfolded(): Save As must persist the exact content the user sees (folded or not).
         await SaveToPathAsync(path);
     }
 

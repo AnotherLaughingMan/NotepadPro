@@ -680,6 +680,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
+        if (path.EndsWith(".code-workspace", StringComparison.OrdinalIgnoreCase))
+        {
+            Explorer.LoadWorkspace(path);
+            AddRecentProject(path);
+            RemoveRecentFile(path);
+            RemoveRecentEditorByPath(path);
+            return;
+        }
+
         var existing = Tabs.FirstOrDefault(t =>
             !t.IsWelcomeTab &&
             string.Equals(t.Editor.FilePath, path, StringComparison.OrdinalIgnoreCase));
