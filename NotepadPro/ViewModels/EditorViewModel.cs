@@ -300,6 +300,14 @@ public sealed class EditorViewModel : ViewModelBase
             return;
         }
 
+        // Auto-save is host-initiated; the bridge should have already pushed the latest
+        // content via the normal 'file:modified' / Text sync paths. If Text is empty while
+        // we still think we have unsaved changes, abort to protect the file.
+        if (string.IsNullOrEmpty(Text) && HasUnsavedChanges)
+        {
+            return;
+        }
+
         EnsureUnfolded();
         await SaveToPathAsync(FilePath);
     }
@@ -508,7 +516,18 @@ public sealed class EditorViewModel : ViewModelBase
         await _saveLock.WaitAsync();
         try
         {
-            var normalized = NormalizeLineEndings(Text, Settings.Eol);
+            var content = Text ?? string.Empty;
+
+            // Belt-and-suspenders: never silently write an empty buffer when we already have
+            // a persisted file on disk and the document reports unsaved changes.
+            // This prevents data loss if the bridge failed to deliver Monaco content.
+            // For a brand-new Save As we allow writing whatever we received (including empty).
+            if (content.Length == 0 && HasUnsavedChanges && File.Exists(path))
+            {
+                return; // abort — do not destroy the user's work on an existing file
+            }
+
+            var normalized = NormalizeLineEndings(content, Settings.Eol);
             var encoding = ResolveEncoding(Settings.Encoding);
             await File.WriteAllTextAsync(path, normalized, encoding);
             HasUnsavedChanges = false;

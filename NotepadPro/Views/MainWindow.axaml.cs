@@ -751,6 +751,11 @@ public partial class MainWindow : Window
         {
             // Always fetch latest Monaco text before writing on close/save prompts.
             var latest = await AwaitLatestEditorTextAsync();
+            if (string.IsNullOrEmpty(latest) && tab.Editor.HasUnsavedChanges)
+            {
+                // Bridge failed to return content — abort to avoid writing an empty file.
+                return false;
+            }
             tab.Editor.Text = latest;
 
             if (string.IsNullOrWhiteSpace(tab.Editor.FilePath))
@@ -774,6 +779,10 @@ public partial class MainWindow : Window
         if (result == SavePromptResult.SaveAs)
         {
             var latest = await AwaitLatestEditorTextAsync();
+            if (string.IsNullOrEmpty(latest) && tab.Editor.HasUnsavedChanges)
+            {
+                return false; // bridge failure — do not destroy content
+            }
             tab.Editor.Text = latest;
 
             var path = await PickSaveFileAsync();
@@ -1488,6 +1497,11 @@ public partial class MainWindow : Window
 
         // Ensure we have the latest text from Monaco before any host-initiated save.
         var latest = await AwaitLatestEditorTextAsync();
+        if (string.IsNullOrEmpty(latest) && ViewModel.Editor.HasUnsavedChanges)
+        {
+            // Bridge returned nothing while we had real unsaved content — abort.
+            return;
+        }
         ViewModel.Editor.Text = latest;
 
         if (string.IsNullOrWhiteSpace(ViewModel.Editor.FilePath))
@@ -1737,6 +1751,20 @@ public partial class MainWindow : Window
             return;
         }
 
+        // For focus/window-change auto-save we need the absolute latest Monaco text.
+        // TriggerAutoSaveAsync only calls Editor.AutoSaveAsync which uses whatever is
+        // currently in Editor.Text. We therefore refresh it here first.
+        if (ViewModel.Settings.AutoSaveMode is AutoSaveMode.OnFocusChange or AutoSaveMode.OnWindowChange)
+        {
+            var latest = await AwaitLatestEditorTextAsync();
+            if (!string.IsNullOrEmpty(latest) || !ViewModel.Editor.HasUnsavedChanges)
+            {
+                ViewModel.Editor.Text = latest;
+            }
+            // If latest is empty and we have unsaved changes we simply skip the auto-save
+            // (the guard inside AutoSaveAsync will also protect us).
+        }
+
         await ViewModel.TriggerAutoSaveAsync(AutoSaveMode.OnFocusChange);
         await ViewModel.TriggerAutoSaveAsync(AutoSaveMode.OnWindowChange);
     }
@@ -1750,6 +1778,22 @@ public partial class MainWindow : Window
 
         // Pull latest Monaco content first so Save As never writes empty data.
         var latest = await AwaitLatestEditorTextAsync();
+
+        // For a brand-new document (no FilePath yet) an empty bridge result may simply mean
+        // the webview hasn't replied yet. Fall back to whatever is currently in the ViewModel
+        // so the user doesn't lose the first Save As. For existing files we still abort.
+        if (string.IsNullOrEmpty(latest) && ViewModel.Editor.HasUnsavedChanges)
+        {
+            if (!string.IsNullOrWhiteSpace(ViewModel.Editor.FilePath))
+            {
+                // Existing file — do not risk data loss.
+                return;
+            }
+
+            // New document — use whatever the host already knows (may be empty, but better than nothing).
+            latest = ViewModel.Editor.Text ?? string.Empty;
+        }
+
         ViewModel.Editor.Text = latest;
 
         var path = await PickSaveFileAsync();
@@ -3922,8 +3966,11 @@ public partial class MainWindow : Window
         _webBridge.RequestEditorText();
 
         // Fallback timeout so we never hang forever on a dead webview.
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(800));
-        cts.Token.Register(() => _pendingEditorTextTcs?.TrySetResult(ViewModel?.Editor.Text ?? string.Empty));
+        // IMPORTANT: never fall back to ViewModel.Editor.Text here — it is frequently stale/empty
+        // because the real content lives in Monaco. Returning empty forces callers to abort the save
+        // rather than overwrite a real file with nothing.
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500));
+        cts.Token.Register(() => _pendingEditorTextTcs?.TrySetResult(string.Empty));
 
         var result = await _pendingEditorTextTcs.Task;
         return result;

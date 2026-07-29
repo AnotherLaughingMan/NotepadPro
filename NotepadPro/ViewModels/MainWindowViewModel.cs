@@ -1748,6 +1748,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
             if (!string.IsNullOrWhiteSpace(tab.Editor.FilePath))
             {
+                // For Save All we must also fetch the latest Monaco content.
+                // The host has no direct reference to the webview for each tab, so we rely
+                // on the already-synced Editor.Text. If it is empty while dirty we abort.
+                if (string.IsNullOrEmpty(tab.Editor.Text) && tab.Editor.HasUnsavedChanges)
+                {
+                    continue; // bridge may have failed; do not destroy content
+                }
                 await tab.Editor.SaveAsync();
             }
             // Untitled tabs are left for the user to Save As explicitly.
