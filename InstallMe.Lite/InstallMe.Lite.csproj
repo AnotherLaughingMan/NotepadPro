@@ -25,7 +25,11 @@
     <FileVersion>$(InstallerVersion)</FileVersion>
   </PropertyGroup><!-- Include optional embedded release zip if present during publish -->
   <ItemGroup>
-    <EmbeddedResource Include="$(PrimaryEmbeddedPackagePath)" Condition="Exists(&apos;$(PrimaryEmbeddedPackagePath)&apos;)"/>
-    <EmbeddedResource Include="$(FallbackEmbeddedPackagePath)" Condition="Exists(&apos;$(FallbackEmbeddedPackagePath)&apos;)"/>
+    <EmbeddedResource Include="$(PrimaryEmbeddedPackagePath)" Condition="Exists(&apos;$(PrimaryEmbeddedPackagePath)&apos;)">
+      <LogicalName>NotepadPro-win-x64-framework-dependent.zip</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(FallbackEmbeddedPackagePath)" Condition="Exists(&apos;$(FallbackEmbeddedPackagePath)&apos;)">
+      <LogicalName>notepadpro_release.zip</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
