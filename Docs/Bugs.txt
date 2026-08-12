@@ -1,0 +1,10 @@
+Severe Bugs:
+New Tab button erases other tabs regardless if they're saved or unsaved.
+Markdown documents in Rendered mode are also erased despite non-Rendered mode still showing text. Broken Markdown Render app has to restart to restore.
+Opening a document with a New Untitled tab present closes the untitled tab. Also Broken Markdown render. App has to restart to restore the Markdown render.
+
+Untitled Tab should only append a number to it if there are other Untitled Tabs. Not when it's the only 1 Untitled Tab. (i.e. we shouldn't be seeing "Untitled (1)" unless there is already a "Untitled" tab present).
+
+Sometimes switching to Rendered in the Markdown bar fails to show documents Rendered version. Results in blank document even though the raw text in Markdown view is still there.
+
+We need to check for more of these types of bugs.

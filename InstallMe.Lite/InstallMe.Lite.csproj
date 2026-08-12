@@ -2,7 +2,7 @@
   <PropertyGroup><!-- Retargeting knobs: defaults here, overridable via Directory.Build.props -->
     <InstallerTargetAppName Condition="&apos;$(InstallerTargetAppName)&apos; == &apos;&apos;">Notepad Pro</InstallerTargetAppName>
     <InstallerPublisher Condition="&apos;$(InstallerPublisher)&apos; == &apos;&apos;">AnotherLaughingMan</InstallerPublisher>
-    <InstallerVersion Condition="&apos;$(InstallerVersion)&apos; == &apos;&apos;">1.3.0</InstallerVersion>
+    <InstallerVersion Condition="&apos;$(InstallerVersion)&apos; == &apos;&apos;">1.4.0</InstallerVersion>
     <PrimaryEmbeddedPackagePath Condition="&apos;$(PrimaryEmbeddedPackagePath)&apos; == &apos;&apos;">..\artifacts\releases\NotepadPro-win-x64-framework-dependent.zip</PrimaryEmbeddedPackagePath>
     <FallbackEmbeddedPackagePath Condition="&apos;$(FallbackEmbeddedPackagePath)&apos; == &apos;&apos;">..\notepadpro_release.zip</FallbackEmbeddedPackagePath>
   </PropertyGroup>

@@ -699,8 +699,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        RemoveWelcomeTabIfPresent();
-        var tab = FindReusableUntitledTab() ?? AddNewTabInternal(isUntitled: false);
+        var tab = AddNewTabInternal(isUntitled: false);
         await tab.Editor.LoadFromFileAsync(path);
         AddRecentFile(path);
         SelectedTab = tab;
@@ -1990,6 +1989,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     private string GetNextUntitledName()
     {
+        var hasUntitled = false;
         var max = 0;
         foreach (var tab in Tabs)
         {
@@ -2003,20 +2003,26 @@ public sealed partial class MainWindowViewModel : ViewModelBase
                 continue;
             }
 
-            var number = ParseUntitledNumber(tab.Editor.FileName);
-            max = Math.Max(max, number);
+            if (!tab.Editor.FileName.StartsWith("Untitled", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            hasUntitled = true;
+            max = Math.Max(max, ParseUntitledNumber(tab.Editor.FileName));
         }
 
-        if (max == 0)
+        if (!hasUntitled)
         {
-            return "Untitled (1)";
+            return "Untitled";
         }
 
-        return $"Untitled ({max + 1})";
+        return $"Untitled ({Math.Max(1, max + 1)})";
     }
 
     private string GetNextUntitledMarkdownName()
     {
+        var hasUntitled = false;
         var max = 0;
         foreach (var tab in Tabs)
         {
@@ -2026,25 +2032,33 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             }
 
             if (!string.IsNullOrWhiteSpace(tab.Editor.FilePath))
+            {
+                continue;
+            }
+
+            if (!tab.Editor.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
+                || !tab.Editor.FileName.StartsWith("Untitled", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
             var number = ParseUntitledMarkdownNumber(tab.Editor.FileName);
+            hasUntitled = true;
             max = Math.Max(max, number);
         }
 
-        if (max == 0)
+        if (!hasUntitled)
         {
-            return "Untitled (1).md";
+            return "Untitled.md";
         }
 
-        return $"Untitled ({max + 1}).md";
+        return $"Untitled ({Math.Max(1, max + 1)}).md";
     }
 
     private string GetNextUntitledNameForExtension(string extension)
     {
         var normalizedExtension = extension.StartsWith('.') ? extension : $".{extension}";
+        var hasUntitled = false;
         var max = 0;
 
         foreach (var tab in Tabs)
@@ -2059,16 +2073,23 @@ public sealed partial class MainWindowViewModel : ViewModelBase
                 continue;
             }
 
+            if (!tab.Editor.FileName.EndsWith(normalizedExtension, StringComparison.OrdinalIgnoreCase)
+                || !tab.Editor.FileName.StartsWith("Untitled", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             var number = ParseUntitledNumberForExtension(tab.Editor.FileName, normalizedExtension);
+            hasUntitled = true;
             max = Math.Max(max, number);
         }
 
-        if (max == 0)
+        if (!hasUntitled)
         {
-            return $"Untitled (1){normalizedExtension}";
+            return $"Untitled{normalizedExtension}";
         }
 
-        return $"Untitled ({max + 1}){normalizedExtension}";
+        return $"Untitled ({Math.Max(1, max + 1)}){normalizedExtension}";
     }
 
     private static int ParseUntitledNumber(string name)
@@ -2084,7 +2105,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             }
         }
 
-        return name.StartsWith("Untitled", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        return 0;
     }
 
     private static int ParseUntitledMarkdownNumber(string name)
@@ -2128,6 +2149,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     private void RemoveWelcomeTabIfPresent()
     {
+        if (Tabs.Any(tab => !tab.IsWelcomeTab))
+        {
+            return;
+        }
+
         for (var i = Tabs.Count - 1; i >= 0; i--)
         {
             if (Tabs[i].IsWelcomeTab)

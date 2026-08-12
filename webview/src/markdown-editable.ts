@@ -37,12 +37,17 @@ export function mountEditableMarkdown(host: HTMLElement, onChanged: MarkdownChan
 }
 
 export function setEditableMarkdownEnabled(enabled: boolean): void {
+  if (!enabled) {
+    cancelPendingSync();
+  }
+
   isEditableEnabled = enabled;
   editableRoot.contentEditable = enabled ? 'true' : 'false';
   editableRoot.style.cursor = enabled ? 'text' : 'default';
 }
 
 export function setEditableMarkdownContent(markdown: string): void {
+  cancelPendingSync();
   const previousSelection = getEditableMarkdownSelection();
   isApplyingExternalContent = true;
   editableRoot.innerHTML = renderMarkdown(markdown);
@@ -153,8 +158,9 @@ function handleEditableInput(): void {
 }
 
 function scheduleSyncToMarkdown(): void {
-  clearTimeout(debouncedSyncTimer);
+  cancelPendingSync();
   debouncedSyncTimer = window.setTimeout(() => {
+    debouncedSyncTimer = 0;
     if (!isEditableEnabled || isApplyingExternalContent || !onMarkdownChanged) {
       return;
     }
@@ -162,6 +168,15 @@ function scheduleSyncToMarkdown(): void {
     const markdown = turndown.turndown(editableRoot.innerHTML);
     onMarkdownChanged(markdown);
   }, 140);
+}
+
+function cancelPendingSync(): void {
+  if (debouncedSyncTimer === 0) {
+    return;
+  }
+
+  clearTimeout(debouncedSyncTimer);
+  debouncedSyncTimer = 0;
 }
 
 function cycleHeadingBlock(decrement: boolean): void {

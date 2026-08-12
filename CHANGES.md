@@ -7,12 +7,26 @@ For the full technical changelog, see [CHANGELOG.md](CHANGELOG.md).
 
 ## Unreleased
 
+_No changes yet._
+
+---
+
+## Version 1.4.0 — August 11, 2026
+
 ### Improvements
 
 - Rendered Markdown editing now better preserves cursor and selection when switching between Source and Rendered modes.
 - Very large Markdown files now automatically use read-only Rendered view to keep editor performance responsive.
 - Read-only Rendered mode now shows an in-view notice when a Markdown file is too large for seamless direct editing.
 - Large Markdown files now skip eager preview-text rendering in the editor model, which reduces Debug startup and edit-time overhead.
+
+### Bug Fixes
+
+- New and opened documents no longer replace existing tabs or unsaved untitled documents.
+- The first untitled document is named `Untitled`; numbered suffixes begin only when another untitled document already exists.
+- Markdown rendered-mode synchronization no longer lets a stale debounced update overwrite the document opened afterward.
+
+---
 
 ## Version 1.2.0 — April 8, 2026
 

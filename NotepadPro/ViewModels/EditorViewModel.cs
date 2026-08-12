@@ -80,7 +80,7 @@ public sealed class EditorViewModel : ViewModelBase
     }
 
     public string FileName => string.IsNullOrWhiteSpace(FilePath)
-        ? (_untitledName ?? "Untitled (1)")
+        ? (_untitledName ?? "Untitled")
         : Path.GetFileName(FilePath);
 
     public bool HasUnsavedChanges

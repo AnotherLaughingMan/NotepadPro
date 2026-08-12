@@ -13,7 +13,7 @@ internal static class InstallerProfile
     public const string InstallerExeName = "InstallMe.Lite.exe";
     public const string InstallerDisplayName = "Notepad Pro (InstallMe Lite)";
     public const string InstallerPublisher = "AnotherLaughingMan";
-    public const string InstallerVersion = "1.3.0";
+    public const string InstallerVersion = "1.4.0";
 
     public const string DefaultInstallPath = "C:\\Apps\\NotepadPro";
     public const string UninstallRegistryKeyName = "NotepadPro_InstallMeLite";
