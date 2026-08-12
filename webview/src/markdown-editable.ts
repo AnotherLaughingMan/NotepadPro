@@ -19,6 +19,7 @@ const editableRoot = document.createElement('div');
 editableRoot.className = 'notepadpro-md-editable';
 editableRoot.contentEditable = 'true';
 editableRoot.spellcheck = true;
+let editableHost: HTMLElement | null = null;
 
 let isEditableEnabled = false;
 let isApplyingExternalContent = false;
@@ -27,6 +28,7 @@ let debouncedSyncTimer = 0;
 
 export function mountEditableMarkdown(host: HTMLElement, onChanged: MarkdownChangedHandler): void {
   onMarkdownChanged = onChanged;
+  editableHost = host;
 
   if (!host.contains(editableRoot)) {
     host.innerHTML = '';
@@ -48,6 +50,11 @@ export function setEditableMarkdownEnabled(enabled: boolean): void {
 
 export function setEditableMarkdownContent(markdown: string): void {
   cancelPendingSync();
+  if (editableHost && !editableHost.contains(editableRoot)) {
+    editableHost.innerHTML = '';
+    editableHost.appendChild(editableRoot);
+  }
+
   const previousSelection = getEditableMarkdownSelection();
   isApplyingExternalContent = true;
   editableRoot.innerHTML = renderMarkdown(markdown);

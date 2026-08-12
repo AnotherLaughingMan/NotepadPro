@@ -626,6 +626,16 @@ bridge.on(msg => {
 
     case 'view:show':
       if (msg.view === 'welcome') {
+        isPreviewVisible = false;
+        sourceSelectionBeforeRenderedToggle = null;
+        setEditableMarkdownEnabled(false);
+        previewEl.dataset.markdownEditMode = 'readonly';
+        previewEl.style.display = 'none';
+        previewEl.style.width = '50%';
+        previewScrollbarEl.style.display = 'none';
+        previewScrollbarEl.dataset.active = 'false';
+        splitterEl.style.display = 'none';
+        editorEl.style.display = 'block';
         containerEl.style.display = 'none';
         welcomeEl.style.display   = 'flex';
         mountWelcome(welcomeEl, msg.data);

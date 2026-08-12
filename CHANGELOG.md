@@ -33,6 +33,38 @@ Complete all items before cutting a new version:
 
 - Placeholder for upcoming bug fixes.
 
+## [1.4.0] - 2026-08-11
+
+### Fixed
+
+- Fixed New Tab and Open File flows replacing existing saved or unsaved tabs.
+- Fixed opening a document closing an existing untitled tab.
+- Fixed the first untitled document being named `Untitled (1)` instead of `Untitled`.
+- Fixed Markdown Rendered mode losing content when switching between documents.
+- Fixed switching from rendered Markdown to another tab and back leaving the preview blank or stale.
+- Fixed closing the last rendered Markdown tab leaving renderer state active behind the Welcome view.
+- Fixed reopening the same Markdown document after closing it so Rendered mode works without restarting the app.
+- Cancelled stale debounced rendered-Markdown updates before new document content is applied.
+- Fixed InstallMe.Lite package discovery by assigning stable logical names to embedded app ZIP resources.
+
+### Changed
+
+- Reset the Markdown renderer, preview splitter, scrollbar, and editable state when returning to the Welcome view.
+- Rebuilt the v1.4.0 release artifacts with the current webview bundle and embedded app package.
+
+## [1.3.0] - 2026-07-29
+
+### Fixed
+
+- Fixed Save, Save As, Save All, close prompts, and auto-save so they fetch the latest editor content before writing.
+- Added safeguards preventing empty buffers from overwriting existing files when a document has unsaved changes.
+- Fixed new documents using Save As so empty or unavailable webview content cannot silently destroy the target file.
+- Increased the editor-content retrieval timeout for slower systems.
+
+### Changed
+
+- Overhauled save reliability across desktop and webview editor paths.
+
 ## [1.2.0] - 2026-04-08
 
 ### Added

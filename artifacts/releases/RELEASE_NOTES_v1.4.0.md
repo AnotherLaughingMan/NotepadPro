@@ -12,8 +12,8 @@
 
 ### Release Assets
 
-- Installer (InstallMe.Lite): `NotepadPro-v1.4.0-20260811-231738.exe`
-- App package (framework-dependent, win-x64): `NotepadPro-v1.4.0-20260811-231738.zip`
+- Installer (InstallMe.Lite): `NotepadPro-v1.4.0-20260811-234428.exe`
+- App package (framework-dependent, win-x64): `NotepadPro-v1.4.0-20260811-234428.zip`
 
 ---
 
